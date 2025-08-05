@@ -16,7 +16,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.1" # Update this to match your version
+          flutter-version: "3.22.2" # Update this to match your version
 
       - name: Install dependencies
         run: flutter pub get
@@ -31,3 +31,5 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
           channelId: live
           projectId: itsolution-93657
+
+
