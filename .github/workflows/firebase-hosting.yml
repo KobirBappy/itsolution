@@ -1,3 +1,5 @@
+# .github/workflows/firebase-hosting.yml
+
 name: Deploy Flutter Web to Firebase Hosting
 
 on:
@@ -16,7 +18,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.1'  # Use the version you want
+          flutter-version: '3.22.1'  # You can adjust this if needed
 
       - name: Install dependencies
         run: flutter pub get
