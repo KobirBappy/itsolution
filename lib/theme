@@ -1,0 +1,2342 @@
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:animated_text_kit/animated_text_kit.dart';
+// import 'package:carousel_slider/carousel_slider.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'dart:math' as math;
+// import 'dart:ui';
+// import 'package:itapp/customer_management.dart';
+// import 'package:itapp/firebase_initializer.dart';
+// import 'package:itapp/order_tracking.dart';
+// import 'package:itapp/product_catalog.dart';
+// import 'package:itapp/servicemanad.dart';
+// import 'package:itapp/shopping_cart.dart';
+// import 'package:itapp/unified_login.dart';
+// import 'package:itapp/user_dashboard.dart';
+// import 'package:itapp/user_profile.dart';
+// import 'firebase_options.dart';
+
+// // Import all pages
+// import 'admindashbord.dart';
+// import 'servicepage.dart';
+// import 'contactpage.dart';
+// import 'paymentintregation.dart';
+// import 'ordermanagementadmin.dart';
+
+// // Import new components
+// import 'floating_chat_widget.dart';
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp(
+//     options: DefaultFirebaseOptions.currentPlatform,
+//   );
+  
+//   // Initialize database with sample data
+//   await FirebaseInitializer.initializeDatabase();
+//   await FirebaseInitializer.createSampleUsers();
+  
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'AppTech Vibe',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//         fontFamily: 'Poppins',
+//         useMaterial3: true,
+//       ),
+//       debugShowCheckedModeBanner: false,
+//       initialRoute: '/',
+//       routes: {
+//         '/': (context) => EnhancedLandingPage(),
+//         '/unified-login': (context) => UnifiedLoginPage(),
+//         '/admin': (context) => EnhancedAdminDashboard(),
+//         '/user-dashboard': (context) => EnhancedUserDashboard(),
+//         '/services': (context) => ServicesPage(),
+//         '/contact': (context) => ContactPage(),
+//         '/products': (context) => ProductCatalogPage(),
+//         '/cart': (context) => ShoppingCartPage(),
+//         '/profile': (context) => UserProfilePage(),
+//         '/customer-management': (context) => CustomerManagementPage(),
+//         '/order-management': (context) => OrderManagementPage(),
+//         '/product-management': (context) => ProductManagementPage(),
+//         '/services-management': (context) => ServicesManagementPage(),
+//       },
+//       onGenerateRoute: (settings) {
+//         if (settings.name == '/payment') {
+//           final args = settings.arguments as Map<String, dynamic>? ?? {};
+//           return MaterialPageRoute(
+//             builder: (context) => PaymentPage(orderDetails: args),
+//           );
+//         }
+//         if (settings.name == '/order-tracking') {
+//           final orderId = settings.arguments as String? ?? '';
+//           return MaterialPageRoute(
+//             builder: (context) => OrderTrackingPage(orderId: orderId),
+//           );
+//         }
+//         return null;
+//       },
+//     );
+//   }
+// }
+
+// // Floating Particles System
+// class FloatingParticle {
+//   late double x;
+//   late double y;
+//   late double size;
+//   late Color color;
+//   late double speed;
+//   late double angle;
+
+//   FloatingParticle({
+//     required double screenWidth,
+//     required double screenHeight,
+//   }) {
+//     x = math.Random().nextDouble() * screenWidth;
+//     y = math.Random().nextDouble() * screenHeight;
+//     size = math.Random().nextDouble() * 4 + 2;
+//     color = [
+//       Colors.blue.withOpacity(0.6),
+//       Colors.purple.withOpacity(0.6),
+//       Colors.pink.withOpacity(0.6),
+//       Colors.cyan.withOpacity(0.6),
+//     ][math.Random().nextInt(4)];
+//     speed = math.Random().nextDouble() * 2 + 1;
+//     angle = math.Random().nextDouble() * 2 * math.pi;
+//   }
+
+//   void update(double screenWidth, double screenHeight) {
+//     x += math.cos(angle) * speed;
+//     y += math.sin(angle) * speed;
+
+//     if (x < 0 || x > screenWidth) angle = math.pi - angle;
+//     if (y < 0 || y > screenHeight) angle = -angle;
+
+//     x = x.clamp(0, screenWidth);
+//     y = y.clamp(0, screenHeight);
+//   }
+// }
+
+// // Optimized Animated Background with Particles
+// class AnimatedBackground extends StatefulWidget {
+//   final Widget child;
+  
+//   const AnimatedBackground({Key? key, required this.child}) : super(key: key);
+  
+//   @override
+//   _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
+// }
+
+// class _AnimatedBackgroundState extends State<AnimatedBackground> 
+//     with TickerProviderStateMixin {
+//   late AnimationController _particleController;
+//   late AnimationController _shapeController;
+//   List<FloatingParticle> particles = [];
+  
+//   @override
+//   void initState() {
+//     super.initState();
+    
+//     // Optimized: Only 2 animation controllers instead of 5+
+//     _particleController = AnimationController(
+//       duration: Duration(milliseconds: 50),
+//       vsync: this,
+//     )..repeat();
+    
+//     _shapeController = AnimationController(
+//       duration: Duration(seconds: 20),
+//       vsync: this,
+//     )..repeat();
+    
+//     // Initialize particles
+//     _initializeParticles();
+//   }
+  
+//   void _initializeParticles() {
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       final size = MediaQuery.of(context).size;
+//       particles = List.generate(15, (index) => 
+//         FloatingParticle(screenWidth: size.width, screenHeight: size.height));
+//     });
+//   }
+  
+//   @override
+//   void dispose() {
+//     _particleController.dispose();
+//     _shapeController.dispose();
+//     super.dispose();
+//   }
+  
+//   @override
+//   Widget build(BuildContext context) {
+//     final size = MediaQuery.of(context).size;
+    
+//     return Stack(
+//       children: [
+//         // Dynamic Gradient Background
+//         Container(
+//           decoration: BoxDecoration(
+//             gradient: LinearGradient(
+//               begin: Alignment.topLeft,
+//               end: Alignment.bottomRight,
+//               colors: [
+//                 Color(0xFF667eea),
+//                 Color(0xFF764ba2),
+//                 Color(0xFFf093fb),
+//                 Color(0xFFf5576c),
+//               ],
+//               stops: [0.0, 0.3, 0.7, 1.0],
+//             ),
+//           ),
+//         ),
+        
+//         // Animated Geometric Shapes
+//         AnimatedBuilder(
+//           animation: _shapeController,
+//           builder: (context, child) {
+//             return Stack(
+//               children: List.generate(3, (index) {
+//                 final offset = _shapeController.value * 2 * math.pi;
+//                 return Positioned(
+//                   left: size.width * 0.1 + 
+//                         math.sin(offset + index * math.pi / 2) * 100,
+//                   top: size.height * 0.2 + 
+//                        math.cos(offset + index * math.pi / 2) * 50,
+//                   child: Transform.rotate(
+//                     angle: offset + index,
+//                     child: Container(
+//                       width: 120 + index * 30.0,
+//                       height: 120 + index * 30.0,
+//                       decoration: BoxDecoration(
+//                         gradient: RadialGradient(
+//                           colors: [
+//                             Colors.white.withOpacity(0.1),
+//                             Colors.transparent,
+//                           ],
+//                         ),
+//                         shape: index % 2 == 0 ? BoxShape.circle : BoxShape.rectangle,
+//                         borderRadius: index % 2 == 0 ? null : BorderRadius.circular(30),
+//                       ),
+//                     ),
+//                   ),
+//                 );
+//               }),
+//             );
+//           },
+//         ),
+        
+//         // Floating Particles System
+//         AnimatedBuilder(
+//           animation: _particleController,
+//           builder: (context, child) {
+//             // Update particles
+//             for (var particle in particles) {
+//               particle.update(size.width, size.height);
+//             }
+            
+//             return CustomPaint(
+//               size: size,
+//               painter: ParticlePainter(particles),
+//             );
+//           },
+//         ),
+        
+//         widget.child,
+//       ],
+//     );
+//   }
+// }
+
+// // Custom Painter for Particles
+// class ParticlePainter extends CustomPainter {
+//   final List<FloatingParticle> particles;
+  
+//   ParticlePainter(this.particles);
+  
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     for (var particle in particles) {
+//       final paint = Paint()
+//         ..color = particle.color
+//         ..style = PaintingStyle.fill;
+      
+//       canvas.drawCircle(
+//         Offset(particle.x, particle.y),
+//         particle.size,
+//         paint,
+//       );
+//     }
+//   }
+  
+//   @override
+//   bool shouldRepaint(CustomPainter oldDelegate) => true;
+// }
+
+// // Enhanced Glassmorphism Card
+// class GlassmorphicCard extends StatelessWidget {
+//   final Widget child;
+//   final double? width;
+//   final double? height;
+//   final EdgeInsets? padding;
+//   final EdgeInsets? margin;
+//   final double blur;
+//   final double opacity;
+//   final BorderRadius? borderRadius;
+//   final List<Color>? gradientColors;
+//   final bool showBorder;
+//   final List<BoxShadow>? shadows;
+  
+//   const GlassmorphicCard({
+//     Key? key,
+//     required this.child,
+//     this.width,
+//     this.height,
+//     this.padding,
+//     this.margin,
+//     this.blur = 15,
+//     this.opacity = 0.15,
+//     this.borderRadius,
+//     this.gradientColors,
+//     this.showBorder = true,
+//     this.shadows,
+//   }) : super(key: key);
+  
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: width,
+//       height: height,
+//       margin: margin,
+//       decoration: BoxDecoration(
+//         borderRadius: borderRadius ?? BorderRadius.circular(25),
+//         boxShadow: shadows ?? [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.1),
+//             blurRadius: 20,
+//             spreadRadius: 5,
+//             offset: Offset(0, 10),
+//           ),
+//         ],
+//       ),
+//       child: ClipRRect(
+//         borderRadius: borderRadius ?? BorderRadius.circular(25),
+//         child: BackdropFilter(
+//           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+//           child: Container(
+//             padding: padding,
+//             decoration: BoxDecoration(
+//               gradient: LinearGradient(
+//                 begin: Alignment.topLeft,
+//                 end: Alignment.bottomRight,
+//                 colors: gradientColors ?? [
+//                   Colors.white.withOpacity(opacity),
+//                   Colors.white.withOpacity(opacity * 0.5),
+//                 ],
+//               ),
+//               borderRadius: borderRadius ?? BorderRadius.circular(25),
+//               border: showBorder ? Border.all(
+//                 color: Colors.white.withOpacity(0.3),
+//                 width: 1.5,
+//               ) : null,
+//             ),
+//             child: child,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// // Enhanced Landing Page with Optimized Performance
+// class EnhancedLandingPage extends StatefulWidget {
+//   @override
+//   _EnhancedLandingPageState createState() => _EnhancedLandingPageState();
+// }
+
+// class _EnhancedLandingPageState extends State<EnhancedLandingPage> 
+//     with TickerProviderStateMixin {
+//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
+//   // Optimized: Reduced to 4 essential animation controllers
+//   late AnimationController _masterController;
+//   late AnimationController _scrollController;
+//   late AnimationController _pulseController;
+//   late AnimationController _rotationController;
+  
+//   ScrollController _pageScrollController = ScrollController();
+  
+//   double _scrollOffset = 0.0;
+//   bool _showScrollToTop = false;
+  
+//   // Modern Tech Stack
+//   final List<TechStack> techStack = [
+//     TechStack(icon: FontAwesomeIcons.flutter, name: 'Flutter', color: Colors.blue),
+//     TechStack(icon: FontAwesomeIcons.react, name: 'React', color: Colors.cyan),
+//     TechStack(icon: FontAwesomeIcons.nodeJs, name: 'Node.js', color: Colors.green),
+//     TechStack(icon: FontAwesomeIcons.python, name: 'Python', color: Colors.yellow),
+//     TechStack(icon: FontAwesomeIcons.docker, name: 'Docker', color: Colors.blue),
+//     TechStack(icon: FontAwesomeIcons.aws, name: 'AWS', color: Colors.orange),
+//   ];
+  
+//   // Stats for animated counters
+//   final List<Map<String, dynamic>> stats = [
+//     {'number': 500, 'suffix': '+', 'label': 'Happy Clients', 'icon': FontAwesomeIcons.users},
+//     {'number': 50, 'suffix': '+', 'label': 'Projects Completed', 'icon': FontAwesomeIcons.projectDiagram},
+//     {'number': 24, 'suffix': '/7', 'label': 'Support Available', 'icon': FontAwesomeIcons.headset},
+//     {'number': 99, 'suffix': '%', 'label': 'Client Satisfaction', 'icon': FontAwesomeIcons.heart},
+//   ];
+  
+//   final List<Service> services = [
+//     Service(
+//       icon: FontAwesomeIcons.mobileAlt,
+//       title: 'App Development',
+//       description: 'Native & Cross-platform mobile applications with modern UI/UX',
+//       color: Colors.blue,
+//       image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400',
+//     ),
+//     Service(
+//       icon: FontAwesomeIcons.networkWired,
+//       title: 'Networking Solutions',
+//       description: 'Enterprise network setup, security, and management',
+//       color: Colors.green,
+//       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400',
+//     ),
+//     Service(
+//       icon: FontAwesomeIcons.server,
+//       title: 'Cloud Infrastructure',
+//       description: 'Scalable cloud solutions and server management',
+//       color: Colors.orange,
+//       image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400',
+//     ),
+//     Service(
+//       icon: FontAwesomeIcons.globe,
+//       title: 'Web Development',
+//       description: 'Modern responsive websites with cutting-edge technology',
+//       color: Colors.purple,
+//       image: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=400',
+//     ),
+//     Service(
+//       icon: FontAwesomeIcons.microchip,
+//       title: 'IoT Development',
+//       description: 'Smart device integration and automation solutions',
+//       color: Colors.teal,
+//       image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
+//     ),
+//     Service(
+//       icon: FontAwesomeIcons.shieldAlt,
+//       title: 'Cybersecurity',
+//       description: 'Advanced security audits and penetration testing',
+//       color: Colors.red,
+//       image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400',
+//     ),
+//   ];
+
+//   @override
+//   void initState() {
+//     super.initState();
+    
+//     // Initialize optimized animation controllers
+//     _masterController = AnimationController(
+//       duration: Duration(seconds: 2),
+//       vsync: this,
+//     );
+    
+//     _scrollController = AnimationController(
+//       duration: Duration(milliseconds: 500),
+//       vsync: this,
+//     );
+    
+//     _pulseController = AnimationController(
+//       duration: Duration(seconds: 3),
+//       vsync: this,
+//     )..repeat(reverse: true);
+    
+//     _rotationController = AnimationController(
+//       duration: Duration(seconds: 10),
+//       vsync: this,
+//     )..repeat();
+    
+//     _masterController.forward();
+    
+//     // Optimized scroll listener
+//     _pageScrollController.addListener(_onScroll);
+//   }
+
+//   void _onScroll() {
+//     if (!mounted) return;
+    
+//     final offset = _pageScrollController.offset;
+//     setState(() {
+//       _scrollOffset = offset;
+//       _showScrollToTop = offset > 300;
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     _masterController.dispose();
+//     _scrollController.dispose();
+//     _pulseController.dispose();
+//     _rotationController.dispose();
+//     _pageScrollController.removeListener(_onScroll);
+//     _pageScrollController.dispose();
+//     super.dispose();
+//   }
+
+//   // Responsive helper methods
+//   bool isMobile(BuildContext context) => MediaQuery.of(context).size.width < 600;
+//   bool isTablet(BuildContext context) => MediaQuery.of(context).size.width < 1200 && MediaQuery.of(context).size.width >= 600;
+//   bool isDesktop(BuildContext context) => MediaQuery.of(context).size.width >= 1200;
+
+//   double getResponsiveFontSize(BuildContext context, {required double mobile, required double tablet, required double desktop}) {
+//     if (isMobile(context)) return mobile;
+//     if (isTablet(context)) return tablet;
+//     return desktop;
+//   }
+
+//   EdgeInsets getResponsivePadding(BuildContext context) {
+//     if (isMobile(context)) return EdgeInsets.symmetric(horizontal: 20, vertical: 40);
+//     if (isTablet(context)) return EdgeInsets.symmetric(horizontal: 40, vertical: 60);
+//     return EdgeInsets.symmetric(horizontal: 80, vertical: 80);
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       extendBodyBehindAppBar: true,
+//       endDrawer: isMobile(context) ? _buildGlassmorphicDrawer() : null,
+//       appBar: _buildGlassmorphicAppBar(),
+//       body: Stack(
+//         children: [
+//           AnimatedBackground(
+//             child: SingleChildScrollView(
+//               controller: _pageScrollController,
+//               child: Column(
+//                 children: [
+//                   _buildHeroSectionWithParallax(),
+//                   _buildTechStackSection(),
+//                   _buildFeaturedProductsGlass(),
+//                   _buildEnhancedServicesGlass(),
+//                   _buildStatsGlassSection(),
+//                   _buildTestimonialsGlass(),
+//                   _buildCallToActionGlass(),
+//                   _buildModernFooter(),
+//                 ],
+//               ),
+//             ),
+//           ),
+          
+//           // Enhanced Floating Chat Widget
+//           FloatingChatWidget(),
+          
+//           // Glassmorphic Scroll to Top Button
+//           AnimatedPositioned(
+//             duration: Duration(milliseconds: 300),
+//             bottom: _showScrollToTop ? 100 : -80,
+//             right: 20,
+//             child: GlassmorphicCard(
+//               padding: EdgeInsets.all(12),
+//               blur: 10,
+//               opacity: 0.2,
+//               borderRadius: BorderRadius.circular(30),
+//               child: IconButton(
+//                 onPressed: () {
+//                   _pageScrollController.animateTo(
+//                     0,
+//                     duration: Duration(milliseconds: 800),
+//                     curve: Curves.easeOutCubic,
+//                   );
+//                 },
+//                 icon: Icon(Icons.keyboard_arrow_up, color: Colors.white, size: 30),
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   PreferredSizeWidget _buildGlassmorphicAppBar() {
+//     return AppBar(
+//       elevation: 0,
+//       backgroundColor: Colors.transparent,
+//       automaticallyImplyLeading: false,
+//       toolbarHeight: isMobile(context) ? 70 : 90,
+//       flexibleSpace: ClipRRect(
+//         child: BackdropFilter(
+//           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+//           child: Container(
+//             decoration: BoxDecoration(
+//               gradient: LinearGradient(
+//                 begin: Alignment.topLeft,
+//                 end: Alignment.bottomRight,
+//                 colors: [
+//                   Colors.white.withOpacity(_scrollOffset > 50 ? 0.9 : 0.1),
+//                   Colors.white.withOpacity(_scrollOffset > 50 ? 0.8 : 0.05),
+//                 ],
+//               ),
+//               border: Border(
+//                 bottom: BorderSide(
+//                   color: Colors.white.withOpacity(0.2),
+//                   width: 1,
+//                 ),
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//       title: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           InkWell(
+//             onTap: () => Navigator.pushReplacementNamed(context, '/'),
+//             child: Row(
+//               children: [
+//                 AnimatedBuilder(
+//                   animation: _rotationController,
+//                   builder: (context, child) {
+//                     return Transform.rotate(
+//                       angle: _rotationController.value * 2 * math.pi,
+//                       child: Container(
+//                         padding: EdgeInsets.all(8),
+//                         decoration: BoxDecoration(
+//                           gradient: LinearGradient(
+//                             colors: [Colors.blue, Colors.purple],
+//                           ),
+//                           shape: BoxShape.circle,
+//                         ),
+//                         child: Icon(
+//                           FontAwesomeIcons.code,
+//                           color: Colors.white,
+//                           size: isMobile(context) ? 20 : 24,
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                 ),
+//                 SizedBox(width: 12),
+//                 Text(
+//                   'AppTech Vibe',
+//                   style: TextStyle(
+//                     color: _scrollOffset > 50 ? Colors.black87 : Colors.white,
+//                     fontWeight: FontWeight.bold,
+//                     fontSize: isMobile(context) ? 20 : 24,
+//                     shadows: _scrollOffset > 50 ? null : [
+//                       Shadow(
+//                         color: Colors.black.withOpacity(0.5),
+//                         offset: Offset(1, 1),
+//                         blurRadius: 3,
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           if (!isMobile(context))
+//             Row(
+//               children: [
+//                 _buildGlassNavButton('Shop', '/products', isHighlighted: true),
+//                 _buildGlassNavButton('Services', '/services'),
+//                 _buildGlassNavButton('About', null),
+//                 _buildGlassNavButton('Contact', '/contact'),
+//                 SizedBox(width: 20),
+//                 _buildGlassmorphicLoginButton(),
+//               ],
+//             ),
+//         ],
+//       ),
+//       actions: [
+//         if (isMobile(context))
+//           Builder(
+//             builder: (context) => IconButton(
+//               icon: Icon(
+//                 Icons.menu, 
+//                 color: _scrollOffset > 50 ? Colors.black87 : Colors.white,
+//                 size: 28,
+//               ),
+//               onPressed: () => Scaffold.of(context).openEndDrawer(),
+//             ),
+//           ),
+//       ],
+//     );
+//   }
+
+//   Widget _buildGlassNavButton(String text, String? route, {bool isHighlighted = false}) {
+//     return Container(
+//       margin: EdgeInsets.symmetric(horizontal: 5),
+//       child: TextButton(
+//         onPressed: route != null ? () => Navigator.pushNamed(context, route) : null,
+//         style: TextButton.styleFrom(
+//           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//           backgroundColor: isHighlighted 
+//               ? Colors.orange.withOpacity(0.2)
+//               : Colors.transparent,
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(25),
+//           ),
+//         ),
+//         child: Text(
+//           text,
+//           style: TextStyle(
+//             fontSize: 16,
+//             fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w500,
+//             color: isHighlighted 
+//                 ? Colors.orange 
+//                 : (_scrollOffset > 50 ? Colors.black87 : Colors.white),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassmorphicLoginButton() {
+//     return GlassmorphicCard(
+//       padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+//       borderRadius: BorderRadius.circular(30),
+//       gradientColors: [
+//         Colors.blue.withOpacity(0.8),
+//         Colors.purple.withOpacity(0.8),
+//       ],
+//       child: InkWell(
+//         onTap: () => Navigator.pushNamed(context, '/unified-login'),
+//         child: Row(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(Icons.account_circle, color: Colors.white, size: 20),
+//             SizedBox(width: 8),
+//             Text(
+//               'Login',
+//               style: TextStyle(
+//                 color: Colors.white,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassmorphicDrawer() {
+//     return ClipRRect(
+//       child: BackdropFilter(
+//         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+//         child: Container(
+//           width: MediaQuery.of(context).size.width * 0.85,
+//           decoration: BoxDecoration(
+//             gradient: LinearGradient(
+//               begin: Alignment.topCenter,
+//               end: Alignment.bottomCenter,
+//               colors: [
+//                 Colors.white.withOpacity(0.9),
+//                 Colors.white.withOpacity(0.8),
+//               ],
+//             ),
+//           ),
+//           child: ListView(
+//             padding: EdgeInsets.zero,
+//             children: [
+//               Container(
+//                 height: 200,
+//                 decoration: BoxDecoration(
+//                   gradient: LinearGradient(
+//                     colors: [
+//                       Colors.blue.withOpacity(0.8),
+//                       Colors.purple.withOpacity(0.8),
+//                     ],
+//                     begin: Alignment.topLeft,
+//                     end: Alignment.bottomRight,
+//                   ),
+//                 ),
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     AnimatedBuilder(
+//                       animation: _rotationController,
+//                       builder: (context, child) {
+//                         return Transform.rotate(
+//                           angle: _rotationController.value * 2 * math.pi,
+//                           child: Container(
+//                             padding: EdgeInsets.all(15),
+//                             decoration: BoxDecoration(
+//                               color: Colors.white.withOpacity(0.2),
+//                               shape: BoxShape.circle,
+//                             ),
+//                             child: Icon(
+//                               FontAwesomeIcons.code,
+//                               color: Colors.white,
+//                               size: 40,
+//                             ),
+//                           ),
+//                         );
+//                       },
+//                     ),
+//                     SizedBox(height: 15),
+//                     Text(
+//                       'AppTech Vibe',
+//                       style: TextStyle(
+//                         color: Colors.white,
+//                         fontSize: 24,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               _buildGlassDrawerItem(Icons.home, 'Home', '/', context),
+//               _buildGlassDrawerItem(Icons.shopping_bag, 'Shop', '/products', context, isHighlighted: true),
+//               _buildGlassDrawerItem(Icons.design_services, 'Services', '/services', context),
+//               _buildGlassDrawerItem(Icons.info, 'About', null, context),
+//               _buildGlassDrawerItem(Icons.contact_mail, 'Contact', '/contact', context),
+//               Divider(color: Colors.grey.withOpacity(0.3)),
+//               _buildGlassDrawerItem(Icons.login, 'Login', '/unified-login', context, isSpecial: true),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassDrawerItem(IconData icon, String title, String? route, BuildContext context, {bool isHighlighted = false, bool isSpecial = false}) {
+//     return Container(
+//       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(15),
+//         gradient: isHighlighted ? LinearGradient(
+//           colors: [
+//             Colors.orange.withOpacity(0.2),
+//             Colors.orange.withOpacity(0.1),
+//           ],
+//         ) : null,
+//       ),
+//       child: ListTile(
+//         leading: Icon(
+//           icon,
+//           color: isHighlighted ? Colors.orange : (isSpecial ? Colors.blue : Colors.grey.shade700),
+//         ),
+//         title: Text(
+//           title,
+//           style: TextStyle(
+//             fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+//             color: isHighlighted ? Colors.orange : (isSpecial ? Colors.blue : Colors.grey.shade700),
+//           ),
+//         ),
+//         onTap: () {
+//           Navigator.pop(context);
+//           if (route != null) {
+//             if (route == '/') {
+//               Navigator.pushReplacementNamed(context, route);
+//             } else {
+//               Navigator.pushNamed(context, route);
+//             }
+//           }
+//         },
+//       ),
+//     );
+//   }
+
+//   Widget _buildHeroSectionWithParallax() {
+//     final screenHeight = MediaQuery.of(context).size.height;
+//     final heroHeight = screenHeight;
+    
+//     return Container(
+//       height: heroHeight,
+//       child: Stack(
+//         children: [
+//           // Background Image with Parallax
+//           Transform.translate(
+//             offset: Offset(0, _scrollOffset * 0.5),
+//             child: Container(
+//               height: heroHeight + 200,
+//               decoration: BoxDecoration(
+//                 image: DecorationImage(
+//                   image: NetworkImage('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920'),
+//                   fit: BoxFit.cover,
+//                 ),
+//               ),
+//             ),
+//           ),
+          
+//           // Gradient Overlay
+//           Container(
+//             height: heroHeight,
+//             decoration: BoxDecoration(
+//               gradient: LinearGradient(
+//                 begin: Alignment.topCenter,
+//                 end: Alignment.bottomCenter,
+//                 colors: [
+//                   Colors.black.withOpacity(0.3),
+//                   Colors.black.withOpacity(0.6),
+//                   Colors.black.withOpacity(0.8),
+//                 ],
+//               ),
+//             ),
+//           ),
+          
+//           // Content
+//           Center(
+//             child: FadeTransition(
+//               opacity: _masterController,
+//               child: Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: 20),
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     // Special Offer Badge
+//                     ScaleTransition(
+//                       scale: CurvedAnimation(
+//                         parent: _masterController,
+//                         curve: Curves.elasticOut,
+//                       ),
+//                       child: GlassmorphicCard(
+//                         padding: EdgeInsets.symmetric(
+//                           horizontal: isMobile(context) ? 20 : 25, 
+//                           vertical: isMobile(context) ? 12 : 15
+//                         ),
+//                         borderRadius: BorderRadius.circular(30),
+//                         gradientColors: [
+//                           Colors.orange.withOpacity(0.9),
+//                           Colors.red.withOpacity(0.9),
+//                         ],
+//                         shadows: [
+//                           BoxShadow(
+//                             color: Colors.orange.withOpacity(0.5),
+//                             blurRadius: 25,
+//                             spreadRadius: 5,
+//                           ),
+//                         ],
+//                         child: Row(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             AnimatedBuilder(
+//                               animation: _pulseController,
+//                               builder: (context, child) {
+//                                 return Transform.scale(
+//                                   scale: 1.0 + (_pulseController.value * 0.2),
+//                                   child: Icon(
+//                                     Icons.local_fire_department, 
+//                                     color: Colors.white, 
+//                                     size: 24
+//                                   ),
+//                                 );
+//                               },
+//                             ),
+//                             SizedBox(width: 8),
+//                             Text(
+//                               '🔥 LIMITED TIME - 75% OFF Launch Deals!',
+//                               style: TextStyle(
+//                                 fontSize: getResponsiveFontSize(context, 
+//                                   mobile: 14, tablet: 16, desktop: 18),
+//                                 color: Colors.white,
+//                                 fontWeight: FontWeight.bold,
+//                               ),
+//                               textAlign: TextAlign.center,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                     SizedBox(height: 30),
+                    
+//                     // Animated Title
+//                     SizedBox(
+//                       height: isMobile(context) ? 80 : 100,
+//                       child: DefaultTextStyle(
+//                         style: TextStyle(
+//                           fontSize: getResponsiveFontSize(context,
+//                             mobile: 32, tablet: 42, desktop: 56),
+//                           fontWeight: FontWeight.bold,
+//                           color: Colors.white,
+//                           shadows: [
+//                             Shadow(
+//                               color: Colors.black.withOpacity(0.5),
+//                               offset: Offset(2, 2),
+//                               blurRadius: 4,
+//                             ),
+//                           ],
+//                         ),
+//                         child: AnimatedTextKit(
+//                           repeatForever: true,
+//                           animatedTexts: [
+//                             FadeAnimatedText('Future-Ready Technology', duration: Duration(seconds: 3)),
+//                             FadeAnimatedText('Digital Transformation', duration: Duration(seconds: 3)),
+//                             FadeAnimatedText('Innovation Excellence', duration: Duration(seconds: 3)),
+//                             FadeAnimatedText('Smart Solutions', duration: Duration(seconds: 3)),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                     SizedBox(height: 25),
+                    
+//                     // Subtitle
+//                     SlideTransition(
+//                       position: Tween<Offset>(
+//                         begin: Offset(0, 1),
+//                         end: Offset.zero,
+//                       ).animate(CurvedAnimation(
+//                         parent: _masterController,
+//                         curve: Curves.easeOutCubic,
+//                       )),
+//                       child: Text(
+//                         'Transform your business with cutting-edge IT solutions designed for tomorrow',
+//                         style: TextStyle(
+//                           fontSize: getResponsiveFontSize(context,
+//                             mobile: 18, tablet: 20, desktop: 22),
+//                           color: Colors.white.withOpacity(0.9),
+//                           shadows: [
+//                             Shadow(
+//                               color: Colors.black.withOpacity(0.5),
+//                               offset: Offset(1, 1),
+//                               blurRadius: 2,
+//                             ),
+//                           ],
+//                         ),
+//                         textAlign: TextAlign.center,
+//                       ),
+//                     ),
+//                     SizedBox(height: 40),
+                    
+//                     // CTA Buttons
+//                     Wrap(
+//                       spacing: 20,
+//                       runSpacing: 20,
+//                       alignment: WrapAlignment.center,
+//                       children: [
+//                         _buildGlassmorphicHeroButton(
+//                           'Explore Products',
+//                           Icons.shopping_bag_outlined,
+//                           [Colors.orange, Colors.red],
+//                           () => Navigator.pushNamed(context, '/products'),
+//                         ),
+//                         _buildGlassmorphicHeroButton(
+//                           'Our Services',
+//                           Icons.design_services_outlined,
+//                           [Colors.blue.withOpacity(0.8), Colors.purple.withOpacity(0.8)],
+//                           () => Navigator.pushNamed(context, '/services'),
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassmorphicHeroButton(String text, IconData icon, List<Color> colors, VoidCallback onPressed) {
+//     return AnimatedBuilder(
+//       animation: _masterController,
+//       builder: (context, child) {
+//         return Transform.translate(
+//           offset: Offset(0, (1 - _masterController.value) * 50),
+//           child: GlassmorphicCard(
+//             padding: EdgeInsets.symmetric(
+//               horizontal: isMobile(context) ? 30 : 40,
+//               vertical: isMobile(context) ? 15 : 20,
+//             ),
+//             borderRadius: BorderRadius.circular(30),
+//             gradientColors: colors,
+//             shadows: [
+//               BoxShadow(
+//                 color: colors[0].withOpacity(0.4),
+//                 blurRadius: 20,
+//                 spreadRadius: 2,
+//                 offset: Offset(0, 10),
+//               ),
+//             ],
+//             child: InkWell(
+//               onTap: onPressed,
+//               borderRadius: BorderRadius.circular(30),
+//               child: Row(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   Icon(icon, color: Colors.white, size: 22),
+//                   SizedBox(width: 12),
+//                   Text(
+//                     text,
+//                     style: TextStyle(
+//                       fontSize: isMobile(context) ? 16 : 18,
+//                       fontWeight: FontWeight.bold,
+//                       color: Colors.white,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildTechStackSection() {
+//     return Container(
+//       padding: getResponsivePadding(context),
+//       child: Column(
+//         children: [
+//           Text(
+//             'Powered by Modern Technology',
+//             style: TextStyle(
+//               fontSize: getResponsiveFontSize(context,
+//                 mobile: 28, tablet: 32, desktop: 36),
+//               fontWeight: FontWeight.bold,
+//               color: Colors.white,
+//               shadows: [
+//                 Shadow(
+//                   color: Colors.black.withOpacity(0.3),
+//                   offset: Offset(1, 1),
+//                   blurRadius: 3,
+//                 ),
+//               ],
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           SizedBox(height: 50),
+//           Wrap(
+//             spacing: 30,
+//             runSpacing: 30,
+//             alignment: WrapAlignment.center,
+//             children: techStack.map((tech) => _buildTechStackItem(tech)).toList(),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildTechStackItem(TechStack tech) {
+//     return AnimatedBuilder(
+//       animation: _pulseController,
+//       builder: (context, child) {
+//         return Transform.scale(
+//           scale: 1.0 + (math.sin(_pulseController.value * 2 * math.pi) * 0.1),
+//           child: GlassmorphicCard(
+//             width: isMobile(context) ? 120 : 140,
+//             height: isMobile(context) ? 120 : 140,
+//             padding: EdgeInsets.all(20),
+//             gradientColors: [
+//               Colors.white.withOpacity(0.15),
+//               Colors.white.withOpacity(0.05),
+//             ],
+//             shadows: [
+//               BoxShadow(
+//                 color: tech.color.withOpacity(0.3),
+//                 blurRadius: 15,
+//                 spreadRadius: 2,
+//               ),
+//             ],
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Container(
+//                   padding: EdgeInsets.all(15),
+//                   decoration: BoxDecoration(
+//                     gradient: RadialGradient(
+//                       colors: [
+//                         tech.color.withOpacity(0.3),
+//                         tech.color.withOpacity(0.1),
+//                       ],
+//                     ),
+//                     shape: BoxShape.circle,
+//                   ),
+//                   child: Icon(
+//                     tech.icon,
+//                     size: isMobile(context) ? 30 : 35,
+//                     color: tech.color,
+//                   ),
+//                 ),
+//                 SizedBox(height: 10),
+//                 Text(
+//                   tech.name,
+//                   style: TextStyle(
+//                     fontSize: isMobile(context) ? 12 : 14,
+//                     fontWeight: FontWeight.bold,
+//                     color: Colors.white,
+//                   ),
+//                   textAlign: TextAlign.center,
+//                 ),
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildFeaturedProductsGlass() {
+//     return Container(
+//       padding: getResponsivePadding(context),
+//       child: Column(
+//         children: [
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               AnimatedBuilder(
+//                 animation: _pulseController,
+//                 builder: (context, child) {
+//                   return Transform.scale(
+//                     scale: 1.0 + (_pulseController.value * 0.3),
+//                     child: Container(
+//                       padding: EdgeInsets.all(10),
+//                       decoration: BoxDecoration(
+//                         gradient: RadialGradient(
+//                           colors: [
+//                             Colors.orange.withOpacity(0.8),
+//                             Colors.red.withOpacity(0.8),
+//                           ],
+//                         ),
+//                         shape: BoxShape.circle,
+//                       ),
+//                       child: Icon(
+//                         Icons.local_fire_department,
+//                         color: Colors.white,
+//                         size: 30,
+//                       ),
+//                     ),
+//                   );
+//                 },
+//               ),
+//               SizedBox(width: 15),
+//               Text(
+//                 'Hot Deals',
+//                 style: TextStyle(
+//                   fontSize: getResponsiveFontSize(context,
+//                     mobile: 32, tablet: 36, desktop: 40),
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.white,
+//                   shadows: [
+//                     Shadow(
+//                       color: Colors.black.withOpacity(0.3),
+//                       offset: Offset(1, 1),
+//                       blurRadius: 3,
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//           SizedBox(height: 20),
+//           Text(
+//             'Limited time offers on our most popular products',
+//             style: TextStyle(
+//               fontSize: getResponsiveFontSize(context,
+//                 mobile: 16, tablet: 18, desktop: 20),
+//               color: Colors.white.withOpacity(0.8),
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           SizedBox(height: 50),
+          
+//           StreamBuilder<QuerySnapshot>(
+//             stream: _firestore
+//                 .collection('products')
+//                 .where('isPopular', isEqualTo: true)
+//                 .limit(3)
+//                 .snapshots(),
+//             builder: (context, snapshot) {
+//               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+//                 return Center(
+//                   child: CircularProgressIndicator(
+//                     valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+//                   ),
+//                 );
+//               }
+              
+//               final products = snapshot.data!.docs;
+              
+//               return SingleChildScrollView(
+//                 scrollDirection: Axis.horizontal,
+//                 child: Row(
+//                   children: products.map((doc) {
+//                     final data = doc.data() as Map<String, dynamic>;
+//                     return _buildGlassmorphicProductCard(data);
+//                   }).toList(),
+//                 ),
+//               );
+//             },
+//           ),
+//           SizedBox(height: 40),
+//           GlassmorphicCard(
+//             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+//             borderRadius: BorderRadius.circular(30),
+//             gradientColors: [
+//               Colors.orange.withOpacity(0.8),
+//               Colors.red.withOpacity(0.8),
+//             ],
+//             child: InkWell(
+//               onTap: () => Navigator.pushNamed(context, '/products'),
+//               child: Row(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   Text(
+//                     'View All Products',
+//                     style: TextStyle(
+//                       fontSize: 16,
+//                       fontWeight: FontWeight.bold,
+//                       color: Colors.white,
+//                     ),
+//                   ),
+//                   SizedBox(width: 8),
+//                   Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassmorphicProductCard(Map<String, dynamic> data) {
+//     return Container(
+//       width: isMobile(context) ? 300 : 340,
+//       margin: EdgeInsets.only(right: 25),
+//       child: GlassmorphicCard(
+//         padding: EdgeInsets.zero,
+//         borderRadius: BorderRadius.circular(25),
+//         gradientColors: [
+//           Colors.white.withOpacity(0.15),
+//           Colors.white.withOpacity(0.05),
+//         ],
+//         shadows: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.2),
+//             blurRadius: 25,
+//             spreadRadius: 5,
+//             offset: Offset(0, 15),
+//           ),
+//         ],
+//         child: InkWell(
+//           onTap: () => Navigator.pushNamed(context, '/products'),
+//           borderRadius: BorderRadius.circular(25),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Stack(
+//                 children: [
+//                   ClipRRect(
+//                     borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+//                     child: Container(
+//                       height: 220,
+//                       decoration: BoxDecoration(
+//                         image: DecorationImage(
+//                           image: NetworkImage(data['image'] ?? 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400'),
+//                           fit: BoxFit.cover,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+                  
+//                   // Discount Badge
+//                   if (data['discount'] != null)
+//                     Positioned(
+//                       top: 15,
+//                       left: 15,
+//                       child: GlassmorphicCard(
+//                         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+//                         borderRadius: BorderRadius.circular(20),
+//                         gradientColors: [
+//                           Colors.red.withOpacity(0.9),
+//                           Colors.red.shade700.withOpacity(0.9),
+//                         ],
+//                         child: Text(
+//                           '${data['discount']}% OFF',
+//                           style: TextStyle(
+//                             color: Colors.white,
+//                             fontWeight: FontWeight.bold,
+//                             fontSize: 12,
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+                  
+//                   // Badge
+//                   if (data['badge'] != null)
+//                     Positioned(
+//                       top: 15,
+//                       right: 15,
+//                       child: GlassmorphicCard(
+//                         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+//                         borderRadius: BorderRadius.circular(20),
+//                         gradientColors: [
+//                           _getBadgeColor(data['badgeColor']).withOpacity(0.9),
+//                           _getBadgeColor(data['badgeColor']).withOpacity(0.7),
+//                         ],
+//                         child: Text(
+//                           data['badge'],
+//                           style: TextStyle(
+//                             color: Colors.white,
+//                             fontWeight: FontWeight.bold,
+//                             fontSize: 12,
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                 ],
+//               ),
+              
+//               Padding(
+//                 padding: EdgeInsets.all(25),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       data['name'] ?? 'Product Name',
+//                       style: TextStyle(
+//                         fontSize: 20,
+//                         fontWeight: FontWeight.bold,
+//                         color: Colors.white,
+//                       ),
+//                     ),
+//                     SizedBox(height: 12),
+//                     Row(
+//                       children: [
+//                         Text(
+//                           "\$${data['price'] ?? '0'}",
+//                           style: TextStyle(
+//                             fontSize: 26,
+//                             fontWeight: FontWeight.bold,
+//                             color: Colors.green.shade300,
+//                           ),
+//                         ),
+//                         SizedBox(width: 12),
+//                         if (data['originalPrice'] != null)
+//                           Text(
+//                             "\$${data['originalPrice']}",
+//                             style: TextStyle(
+//                               fontSize: 18,
+//                               color: Colors.white.withOpacity(0.6),
+//                               decoration: TextDecoration.lineThrough,
+//                             ),
+//                           ),
+//                       ],
+//                     ),
+//                     SizedBox(height: 20),
+//                     SizedBox(
+//                       width: double.infinity,
+//                       child: GlassmorphicCard(
+//                         padding: EdgeInsets.symmetric(vertical: 15),
+//                         borderRadius: BorderRadius.circular(15),
+//                         gradientColors: [
+//                           Colors.orange.withOpacity(0.8),
+//                           Colors.red.withOpacity(0.8),
+//                         ],
+//                         child: InkWell(
+//                           onTap: () => Navigator.pushNamed(context, '/products'),
+//                           child: Text(
+//                             'View Details',
+//                             style: TextStyle(
+//                               fontWeight: FontWeight.bold,
+//                               color: Colors.white,
+//                               fontSize: 16,
+//                             ),
+//                             textAlign: TextAlign.center,
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Color _getBadgeColor(String? color) {
+//     switch (color) {
+//       case 'orange': return Colors.orange;
+//       case 'blue': return Colors.blue;
+//       case 'red': return Colors.red;
+//       case 'green': return Colors.green;
+//       case 'purple': return Colors.purple;
+//       case 'indigo': return Colors.indigo;
+//       default: return Colors.grey;
+//     }
+//   }
+
+//   Widget _buildEnhancedServicesGlass() {
+//     return Container(
+//       padding: getResponsivePadding(context),
+//       child: Column(
+//         children: [
+//           Text(
+//             'Our Premium Services',
+//             style: TextStyle(
+//               fontSize: getResponsiveFontSize(context,
+//                 mobile: 32, tablet: 36, desktop: 40),
+//               fontWeight: FontWeight.bold,
+//               color: Colors.white,
+//               shadows: [
+//                 Shadow(
+//                   color: Colors.black.withOpacity(0.3),
+//                   offset: Offset(1, 1),
+//                   blurRadius: 3,
+//                 ),
+//               ],
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           SizedBox(height: 20),
+//           Text(
+//             'Comprehensive IT solutions tailored for modern businesses',
+//             style: TextStyle(
+//               fontSize: getResponsiveFontSize(context,
+//                 mobile: 16, tablet: 18, desktop: 20),
+//               color: Colors.white.withOpacity(0.8),
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           SizedBox(height: 60),
+//           GridView.builder(
+//             shrinkWrap: true,
+//             physics: NeverScrollableScrollPhysics(),
+//             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//               crossAxisCount: isMobile(context) ? 1 : 
+//                               isTablet(context) ? 2 : 3,
+//               crossAxisSpacing: 20,
+//               mainAxisSpacing: 20,
+//               childAspectRatio: isMobile(context) ? 1.4 : 1.3,
+//             ),
+//             itemCount: services.length,
+//             itemBuilder: (context, index) {
+//               return _buildGlassmorphicServiceCard(services[index], index);
+//             },
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassmorphicServiceCard(Service service, int index) {
+//     return AnimatedBuilder(
+//       animation: _pulseController,
+//       builder: (context, child) {
+//         final pulseValue = math.sin((_pulseController.value * 2 * math.pi) + (index * 0.5));
+//         return Transform.scale(
+//           scale: 1.0 + (pulseValue * 0.02),
+//           child: GlassmorphicCard(
+//             padding: EdgeInsets.all(isMobile(context) ? 20 : 25),
+//             gradientColors: [
+//               Colors.white.withOpacity(0.15),
+//               Colors.white.withOpacity(0.05),
+//             ],
+//             shadows: [
+//               BoxShadow(
+//                 color: service.color.withOpacity(0.2),
+//                 blurRadius: 15,
+//                 spreadRadius: 2,
+//                 offset: Offset(0, 8),
+//               ),
+//             ],
+//             child: InkWell(
+//               onTap: () => Navigator.pushNamed(context, '/services'),
+//               borderRadius: BorderRadius.circular(25),
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   Container(
+//                     padding: EdgeInsets.all(isMobile(context) ? 15 : 18),
+//                     decoration: BoxDecoration(
+//                       gradient: RadialGradient(
+//                         colors: [
+//                           service.color.withOpacity(0.3),
+//                           service.color.withOpacity(0.1),
+//                         ],
+//                       ),
+//                       shape: BoxShape.circle,
+//                     ),
+//                     child: Icon(
+//                       service.icon,
+//                       size: isMobile(context) ? 28 : 32,
+//                       color: service.color,
+//                     ),
+//                   ),
+//                   SizedBox(height: 15),
+//                   Text(
+//                     service.title,
+//                     style: TextStyle(
+//                       fontSize: isMobile(context) ? 16 : 18,
+//                       fontWeight: FontWeight.bold,
+//                       color: Colors.white,
+//                     ),
+//                     textAlign: TextAlign.center,
+//                   ),
+//                   SizedBox(height: 8),
+//                   Text(
+//                     service.description,
+//                     style: TextStyle(
+//                       fontSize: isMobile(context) ? 12 : 14,
+//                       color: Colors.white.withOpacity(0.8),
+//                     ),
+//                     textAlign: TextAlign.center,
+//                     maxLines: 2,
+//                     overflow: TextOverflow.ellipsis,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildStatsGlassSection() {
+//     return Container(
+//       padding: getResponsivePadding(context),
+//       child: Column(
+//         children: [
+//           Text(
+//             '🌟 Our Achievements',
+//             style: TextStyle(
+//               fontSize: getResponsiveFontSize(context,
+//                 mobile: 32, tablet: 36, desktop: 40),
+//               fontWeight: FontWeight.bold,
+//               color: Colors.white,
+//               shadows: [
+//                 Shadow(
+//                   color: Colors.black.withOpacity(0.3),
+//                   offset: Offset(1, 1),
+//                   blurRadius: 3,
+//                 ),
+//               ],
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           SizedBox(height: 50),
+//           GridView.builder(
+//             shrinkWrap: true,
+//             physics: NeverScrollableScrollPhysics(),
+//             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//               crossAxisCount: isMobile(context) ? 2 : 4,
+//               crossAxisSpacing: 25,
+//               mainAxisSpacing: 25,
+//               childAspectRatio: 1.2,
+//             ),
+//             itemCount: stats.length,
+//             itemBuilder: (context, index) {
+//               final stat = stats[index];
+//               return _buildGlassmorphicStatCard(stat, index);
+//             },
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassmorphicStatCard(Map<String, dynamic> stat, int index) {
+//     return AnimatedBuilder(
+//       animation: _pulseController,
+//       builder: (context, child) {
+//         final pulseValue = math.sin((_pulseController.value * 2 * math.pi) + (index * 0.3));
+//         return Transform.scale(
+//           scale: 1.0 + (pulseValue * 0.1),
+//           child: GlassmorphicCard(
+//             padding: EdgeInsets.all(20),
+//             gradientColors: [
+//               Colors.white.withOpacity(0.2),
+//               Colors.white.withOpacity(0.1),
+//             ],
+//             shadows: [
+//               BoxShadow(
+//                 color: Colors.blue.withOpacity(0.3),
+//                 blurRadius: 20,
+//                 spreadRadius: 3,
+//                 offset: Offset(0, 10),
+//               ),
+//             ],
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Icon(
+//                   stat['icon'],
+//                   size: 40,
+//                   color: Colors.white,
+//                 ),
+//                 SizedBox(height: 15),
+//                 TweenAnimationBuilder<int>(
+//                   tween: IntTween(begin: 0, end: stat['number']),
+//                   duration: Duration(seconds: 2),
+//                   builder: (context, value, child) {
+//                     return Text(
+//                       '$value${stat['suffix']}',
+//                       style: TextStyle(
+//                         fontSize: getResponsiveFontSize(context,
+//                           mobile: 26, tablet: 30, desktop: 34),
+//                         fontWeight: FontWeight.bold,
+//                         color: Colors.white,
+//                       ),
+//                     );
+//                   },
+//                 ),
+//                 SizedBox(height: 8),
+//                 Text(
+//                   stat['label'],
+//                   style: TextStyle(
+//                     fontSize: getResponsiveFontSize(context,
+//                       mobile: 12, tablet: 14, desktop: 16),
+//                     color: Colors.white.withOpacity(0.8),
+//                   ),
+//                   textAlign: TextAlign.center,
+//                 ),
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildTestimonialsGlass() {
+//     final testimonials = [
+//       {
+//         'name': 'Sarah Johnson',
+//         'company': 'Tech Innovations',
+//         'image': 'https://i.pravatar.cc/150?img=1',
+//         'text': 'Exceptional service! Their team delivered beyond our expectations with innovative solutions.',
+//         'rating': 5,
+//       },
+//       {
+//         'name': 'Michael Chen',
+//         'company': 'Digital Dynamics',
+//         'image': 'https://i.pravatar.cc/150?img=2',
+//         'text': 'Professional, reliable, and cutting-edge technology. They transformed our entire infrastructure.',
+//         'rating': 5,
+//       },
+//       {
+//         'name': 'Emily Rodriguez',
+//         'company': 'Future Systems',
+//         'image': 'https://i.pravatar.cc/150?img=3',
+//         'text': 'Their IoT solutions revolutionized our operations. Highly recommended for any tech project.',
+//         'rating': 5,
+//       },
+//     ];
+
+//     return Container(
+//       padding: getResponsivePadding(context),
+//       child: Column(
+//         children: [
+//           Text(
+//             'What Our Clients Say',
+//             style: TextStyle(
+//               fontSize: getResponsiveFontSize(context,
+//                 mobile: 32, tablet: 36, desktop: 40),
+//               fontWeight: FontWeight.bold,
+//               color: Colors.white,
+//               shadows: [
+//                 Shadow(
+//                   color: Colors.black.withOpacity(0.3),
+//                   offset: Offset(1, 1),
+//                   blurRadius: 3,
+//                 ),
+//               ],
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           SizedBox(height: 60),
+//           CarouselSlider(
+//             options: CarouselOptions(
+//               height: isMobile(context) ? 420 : 380,
+//               autoPlay: true,
+//               autoPlayInterval: Duration(seconds: 5),
+//               enlargeCenterPage: true,
+//               viewportFraction: isMobile(context) ? 0.9 : 0.6,
+//             ),
+//             items: testimonials.map((testimonial) {
+//               return GlassmorphicCard(
+//                 margin: EdgeInsets.symmetric(horizontal: 10),
+//                 padding: EdgeInsets.all(isMobile(context) ? 25 : 35),
+//                 gradientColors: [
+//                   Colors.white.withOpacity(0.15),
+//                   Colors.white.withOpacity(0.05),
+//                 ],
+//                 shadows: [
+//                   BoxShadow(
+//                     color: Colors.blue.withOpacity(0.3),
+//                     blurRadius: 25,
+//                     spreadRadius: 5,
+//                     offset: Offset(0, 15),
+//                   ),
+//                 ],
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     Container(
+//                       decoration: BoxDecoration(
+//                         shape: BoxShape.circle,
+//                         boxShadow: [
+//                           BoxShadow(
+//                             color: Colors.blue.withOpacity(0.4),
+//                             blurRadius: 25,
+//                             spreadRadius: 5,
+//                           ),
+//                         ],
+//                       ),
+//                       child: CircleAvatar(
+//                         radius: isMobile(context) ? 45 : 55,
+//                         backgroundImage: NetworkImage(testimonial['image'] as String),
+//                       ),
+//                     ),
+//                     SizedBox(height: 25),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: List.generate(5, (index) {
+//                         return Icon(
+//                           Icons.star,
+//                           color: index < (testimonial['rating'] as int) ? Colors.amber : Colors.white.withOpacity(0.3),
+//                           size: 22,
+//                         );
+//                       }),
+//                     ),
+//                     SizedBox(height: 20),
+//                     Text(
+//                       testimonial['text'] as String,
+//                       style: TextStyle(
+//                         fontSize: isMobile(context) ? 16 : 18,
+//                         fontStyle: FontStyle.italic,
+//                         color: Colors.white.withOpacity(0.9),
+//                         height: 1.5,
+//                       ),
+//                       textAlign: TextAlign.center,
+//                     ),
+//                     SizedBox(height: 25),
+//                     Text(
+//                       testimonial['name'] as String,
+//                       style: TextStyle(
+//                         fontSize: isMobile(context) ? 18 : 20,
+//                         fontWeight: FontWeight.bold,
+//                         color: Colors.white,
+//                       ),
+//                     ),
+//                     SizedBox(height: 5),
+//                     Text(
+//                       testimonial['company'] as String,
+//                       style: TextStyle(
+//                         fontSize: isMobile(context) ? 14 : 16,
+//                         color: Colors.white.withOpacity(0.7),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               );
+//             }).toList(),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildCallToActionGlass() {
+//     return Container(
+//       padding: getResponsivePadding(context),
+//       child: GlassmorphicCard(
+//         padding: EdgeInsets.all(isMobile(context) ? 40 : 60),
+//         gradientColors: [
+//           Colors.blue.withOpacity(0.2),
+//           Colors.purple.withOpacity(0.2),
+//         ],
+//         shadows: [
+//           BoxShadow(
+//             color: Colors.blue.withOpacity(0.3),
+//             blurRadius: 30,
+//             spreadRadius: 10,
+//             offset: Offset(0, 15),
+//           ),
+//         ],
+//         child: Column(
+//           children: [
+//             Text(
+//               '🚀 Ready to Transform Your Business?',
+//               style: TextStyle(
+//                 fontSize: getResponsiveFontSize(context,
+//                   mobile: 28, tablet: 32, desktop: 36),
+//                 fontWeight: FontWeight.bold,
+//                 color: Colors.white,
+//                 shadows: [
+//                   Shadow(
+//                     color: Colors.black.withOpacity(0.3),
+//                     offset: Offset(1, 1),
+//                     blurRadius: 3,
+//                   ),
+//                 ],
+//               ),
+//               textAlign: TextAlign.center,
+//             ),
+//             SizedBox(height: 20),
+//             Text(
+//               'Join hundreds of satisfied clients who have revolutionized their operations with our cutting-edge IT solutions',
+//               style: TextStyle(
+//                 fontSize: getResponsiveFontSize(context,
+//                   mobile: 16, tablet: 18, desktop: 20),
+//                 color: Colors.white.withOpacity(0.8),
+//                 height: 1.5,
+//               ),
+//               textAlign: TextAlign.center,
+//             ),
+//             SizedBox(height: 40),
+//             Wrap(
+//               spacing: 20,
+//               runSpacing: 20,
+//               alignment: WrapAlignment.center,
+//               children: [
+//                 GlassmorphicCard(
+//                   padding: EdgeInsets.symmetric(horizontal: 35, vertical: 18),
+//                   borderRadius: BorderRadius.circular(30),
+//                   gradientColors: [
+//                     Colors.orange.withOpacity(0.9),
+//                     Colors.red.withOpacity(0.9),
+//                   ],
+//                   shadows: [
+//                     BoxShadow(
+//                       color: Colors.orange.withOpacity(0.5),
+//                       blurRadius: 20,
+//                       spreadRadius: 3,
+//                     ),
+//                   ],
+//                   child: InkWell(
+//                     onTap: () => Navigator.pushNamed(context, '/contact'),
+//                     child: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         Icon(Icons.rocket_launch, color: Colors.white, size: 22),
+//                         SizedBox(width: 10),
+//                         Text(
+//                           'Get Started Now',
+//                           style: TextStyle(
+//                             fontSize: 16,
+//                             fontWeight: FontWeight.bold,
+//                             color: Colors.white,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//                 GlassmorphicCard(
+//                   padding: EdgeInsets.symmetric(horizontal: 35, vertical: 18),
+//                   borderRadius: BorderRadius.circular(30),
+//                   gradientColors: [
+//                     Colors.white.withOpacity(0.2),
+//                     Colors.white.withOpacity(0.1),
+//                   ],
+//                   showBorder: true,
+//                   child: InkWell(
+//                     onTap: () => Navigator.pushNamed(context, '/services'),
+//                     child: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         Icon(Icons.info_outline, color: Colors.white, size: 22),
+//                         SizedBox(width: 10),
+//                         Text(
+//                           'Learn More',
+//                           style: TextStyle(
+//                             fontSize: 16,
+//                             fontWeight: FontWeight.bold,
+//                             color: Colors.white,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: 30),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Icon(Icons.security, color: Colors.green, size: 20),
+//                 SizedBox(width: 8),
+//                 Text(
+//                   '100% Secure & Trusted',
+//                   style: TextStyle(
+//                     color: Colors.white.withOpacity(0.8),
+//                     fontSize: 14,
+//                   ),
+//                 ),
+//                 SizedBox(width: 20),
+//                 Icon(Icons.support_agent, color: Colors.blue, size: 20),
+//                 SizedBox(width: 8),
+//                 Text(
+//                   '24/7 Support',
+//                   style: TextStyle(
+//                     color: Colors.white.withOpacity(0.8),
+//                     fontSize: 14,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildModernFooter() {
+//     return Container(
+//       padding: EdgeInsets.symmetric(
+//         vertical: isMobile(context) ? 50 : 70, 
+//         horizontal: 20
+//       ),
+//       decoration: BoxDecoration(
+//         gradient: LinearGradient(
+//           begin: Alignment.topCenter,
+//           end: Alignment.bottomCenter,
+//           colors: [
+//             Colors.black.withOpacity(0.8),
+//             Colors.black.withOpacity(0.95),
+//           ],
+//         ),
+//       ),
+//       child: Column(
+//         children: [
+//           if (isMobile(context))
+//             Column(
+//               children: [
+//                 Column(
+//                   children: [
+//                     AnimatedBuilder(
+//                       animation: _rotationController,
+//                       builder: (context, child) {
+//                         return Transform.rotate(
+//                           angle: _rotationController.value * 2 * math.pi,
+//                           child: Container(
+//                             padding: EdgeInsets.all(15),
+//                             decoration: BoxDecoration(
+//                               gradient: LinearGradient(
+//                                 colors: [Colors.blue, Colors.purple],
+//                               ),
+//                               shape: BoxShape.circle,
+//                               boxShadow: [
+//                                 BoxShadow(
+//                                   color: Colors.blue.withOpacity(0.5),
+//                                   blurRadius: 20,
+//                                   spreadRadius: 5,
+//                                 ),
+//                               ],
+//                             ),
+//                             child: Icon(
+//                               FontAwesomeIcons.code,
+//                               color: Colors.white,
+//                               size: 35,
+//                             ),
+//                           ),
+//                         );
+//                       },
+//                     ),
+//                     SizedBox(height: 15),
+//                     Text(
+//                       'AppTech Vibe',
+//                       style: TextStyle(
+//                         color: Colors.white,
+//                         fontSize: 28,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                     SizedBox(height: 20),
+//                     Text(
+//                       'Your trusted partner in digital transformation and innovation',
+//                       style: TextStyle(
+//                         color: Colors.grey.shade400,
+//                         fontSize: 16,
+//                       ),
+//                       textAlign: TextAlign.center,
+//                     ),
+//                     SizedBox(height: 30),
+//                     Wrap(
+//                       spacing: 20,
+//                       children: [
+//                         _buildModernSocialIcon(FontAwesomeIcons.facebook, Colors.blue),
+//                         _buildModernSocialIcon(FontAwesomeIcons.twitter, Colors.lightBlue),
+//                         _buildModernSocialIcon(FontAwesomeIcons.linkedin, Colors.blueAccent),
+//                         _buildModernSocialIcon(FontAwesomeIcons.instagram, Colors.pink),
+//                         _buildModernSocialIcon(FontAwesomeIcons.github, Colors.grey),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//                 SizedBox(height: 50),
+//                 _buildGlassFooterSection('Services', [
+//                   'Mobile App Development',
+//                   'Web Development',
+//                   'Cloud Solutions',
+//                   'IoT Development',
+//                   'Cybersecurity',
+//                   'Digital Transformation',
+//                 ]),
+//                 SizedBox(height: 40),
+//                 _buildGlassFooterSection('Company', [
+//                   'About Us',
+//                   'Our Team',
+//                   'Careers',
+//                   'Portfolio',
+//                   'Blog',
+//                   'Press',
+//                 ]),
+//                 SizedBox(height: 40),
+//                 _buildGlassFooterSection('Contact', [
+//                   'info@apptechvibe.com',
+//                   '+880 1234-567890',
+//                   'Dhaka, Bangladesh',
+//                   'Open 24/7',
+//                 ]),
+//               ],
+//             )
+//           else
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Expanded(
+//                   flex: 2,
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Row(
+//                         children: [
+//                           AnimatedBuilder(
+//                             animation: _rotationController,
+//                             builder: (context, child) {
+//                               return Transform.rotate(
+//                                 angle: _rotationController.value * 2 * math.pi,
+//                                 child: Container(
+//                                   padding: EdgeInsets.all(12),
+//                                   decoration: BoxDecoration(
+//                                     gradient: LinearGradient(
+//                                       colors: [Colors.blue, Colors.purple],
+//                                     ),
+//                                     shape: BoxShape.circle,
+//                                     boxShadow: [
+//                                       BoxShadow(
+//                                         color: Colors.blue.withOpacity(0.5),
+//                                         blurRadius: 15,
+//                                         spreadRadius: 3,
+//                                       ),
+//                                     ],
+//                                   ),
+//                                   child: Icon(
+//                                     FontAwesomeIcons.code,
+//                                     color: Colors.white,
+//                                     size: 25,
+//                                   ),
+//                                 ),
+//                               );
+//                             },
+//                           ),
+//                           SizedBox(width: 15),
+//                           Text(
+//                             'AppTech Vibe',
+//                             style: TextStyle(
+//                               color: Colors.white,
+//                               fontSize: 28,
+//                               fontWeight: FontWeight.bold,
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                       SizedBox(height: 25),
+//                       Text(
+//                         'Your trusted partner in digital transformation and innovation. We deliver cutting-edge IT solutions that drive business growth.',
+//                         style: TextStyle(
+//                           color: Colors.grey.shade400,
+//                           fontSize: 16,
+//                           height: 1.6,
+//                         ),
+//                       ),
+//                       SizedBox(height: 30),
+//                       Wrap(
+//                         spacing: 15,
+//                         children: [
+//                           _buildModernSocialIcon(FontAwesomeIcons.facebook, Colors.blue),
+//                           _buildModernSocialIcon(FontAwesomeIcons.twitter, Colors.lightBlue),
+//                           _buildModernSocialIcon(FontAwesomeIcons.linkedin, Colors.blueAccent),
+//                           _buildModernSocialIcon(FontAwesomeIcons.instagram, Colors.pink),
+//                           _buildModernSocialIcon(FontAwesomeIcons.github, Colors.grey),
+//                         ],
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 SizedBox(width: 40),
+//                 Expanded(
+//                   child: _buildGlassFooterSection('Services', [
+//                     'Mobile Development',
+//                     'Web Development',
+//                     'Cloud Solutions',
+//                     'IoT Development',
+//                     'Cybersecurity',
+//                     'Consulting',
+//                   ]),
+//                 ),
+//                 SizedBox(width: 40),
+//                 Expanded(
+//                   child: _buildGlassFooterSection('Company', [
+//                     'About Us',
+//                     'Our Team',
+//                     'Careers',
+//                     'Portfolio',
+//                     'Blog',
+//                     'Press',
+//                   ]),
+//                 ),
+//                 SizedBox(width: 40),
+//                 Expanded(
+//                   child: _buildGlassFooterSection('Contact', [
+//                     'info@apptechvibe.com',
+//                     '+880 1234-567890',
+//                     'Dhaka, Bangladesh',
+//                     'Open 24/7',
+//                   ]),
+//                 ),
+//               ],
+//             ),
+//           SizedBox(height: 50),
+//           Container(
+//             height: 1,
+//             decoration: BoxDecoration(
+//               gradient: LinearGradient(
+//                 colors: [
+//                   Colors.transparent,
+//                   Colors.grey.withOpacity(0.5),
+//                   Colors.transparent,
+//                 ],
+//               ),
+//             ),
+//           ),
+//           SizedBox(height: 30),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Text(
+//                 '© 2024 AppTech Vibe. All rights reserved.',
+//                 style: TextStyle(
+//                   color: Colors.grey.shade400,
+//                   fontSize: isMobile(context) ? 12 : 14,
+//                 ),
+//               ),
+//               if (!isMobile(context))
+//                 Row(
+//                   children: [
+//                     Text('Privacy Policy', style: TextStyle(color: Colors.grey.shade400, fontSize: 14)),
+//                     SizedBox(width: 20),
+//                     Text('Terms of Service', style: TextStyle(color: Colors.grey.shade400, fontSize: 14)),
+//                     SizedBox(width: 20),
+//                     Text('Cookie Policy', style: TextStyle(color: Colors.grey.shade400, fontSize: 14)),
+//                   ],
+//                 ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildGlassFooterSection(String title, List<String> items) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text(
+//           title,
+//           style: TextStyle(
+//             color: Colors.white,
+//             fontSize: 20,
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         SizedBox(height: 20),
+//         ...items.map((item) => Padding(
+//           padding: EdgeInsets.symmetric(vertical: 8),
+//           child: InkWell(
+//             onTap: () {}, // Add navigation logic here
+//             child: Text(
+//               item,
+//               style: TextStyle(
+//                 color: Colors.grey.shade400,
+//                 fontSize: 15,
+//                 height: 1.5,
+//               ),
+//             ),
+//           ),
+//         )).toList(),
+//       ],
+//     );
+//   }
+
+//   Widget _buildModernSocialIcon(IconData icon, Color color) {
+//     return AnimatedBuilder(
+//       animation: _pulseController,
+//       builder: (context, child) {
+//         return Transform.scale(
+//           scale: 1.0 + (math.sin(_pulseController.value * 2 * math.pi) * 0.1),
+//           child: GlassmorphicCard(
+//             padding: EdgeInsets.all(12),
+//             borderRadius: BorderRadius.circular(15),
+//             gradientColors: [
+//               color.withOpacity(0.2),
+//               color.withOpacity(0.1),
+//             ],
+//             shadows: [
+//               BoxShadow(
+//                 color: color.withOpacity(0.3),
+//                 blurRadius: 10,
+//                 spreadRadius: 2,
+//               ),
+//             ],
+//             child: InkWell(
+//               onTap: () {}, // Add social media navigation
+//               child: Icon(
+//                 icon,
+//                 color: color,
+//                 size: 20,
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
+
+// // Service Model
+// class Service {
+//   final IconData icon;
+//   final String title;
+//   final String description;
+//   final Color color;
+//   final String image;
+
+//   Service({
+//     required this.icon,
+//     required this.title,
+//     required this.description,
+//     required this.color,
+//     required this.image,
+//   });
+// }
+
+// // Tech Stack Model
+// class TechStack {
+//   final IconData icon;
+//   final String name;
+//   final Color color;
+
+//   TechStack({
+//     required this.icon,
+//     required this.name,
+//     required this.color,
+//   });
+// }
