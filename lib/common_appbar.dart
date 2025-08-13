@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'unified_login.dart'; // Add this import for the login popup
 
 enum AppBarType {
   home,
@@ -685,22 +686,43 @@ class _CommonAppBarState extends State<CommonAppBar> {
   }
 
   Widget _buildAnimatedLoginButton() {
-    return ElevatedButton(
-      onPressed: () => Navigator.pushNamed(context, '/unified-login'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-        elevation: 5,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.account_circle, size: 20),
-          SizedBox(width: 8),
-          Text('Login'),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade700, Colors.blue.shade500],
+        ),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 1,
+            offset: Offset(0, 2),
+          ),
         ],
+      ),
+      child: ElevatedButton(
+        onPressed: () => LoginPopupModal.show(context), // Updated to use popup instead of navigation
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.account_circle, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'Login',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

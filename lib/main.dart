@@ -26,6 +26,7 @@ import 'contactpage.dart';
 import 'paymentintregation.dart';
 import 'ordermanagementadmin.dart';
 
+
 // Import new components
 import 'floating_chat_widget.dart';
 
@@ -57,7 +58,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => EnhancedLandingPage(),
-        '/unified-login': (context) => UnifiedLoginPage(),
+        // Removed '/unified-login' route since we're using popup now
         '/admin': (context) => EnhancedAdminDashboard(),
         '/user-dashboard': (context) => EnhancedUserDashboard(),
         '/services': (context) => ServicesPage(),
@@ -107,9 +108,9 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
   void initState() {
     super.initState();
     _controllers = List.generate(
-      5,
+      6,
       (index) => AnimationController(
-        duration: Duration(seconds: 10 + index * 2),
+        duration: Duration(seconds: 8 + index * 2),
         vsync: this,
       ),
     );
@@ -135,42 +136,53 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Gradient Background
+        // Enhanced Gradient Background
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF1A237E).withOpacity(0.05),
-                Color(0xFF3949AB).withOpacity(0.05),
-                Color(0xFF5C6BC0).withOpacity(0.05),
+                Color(0xFFF8FAFC),
+                Color(0xFFE2E8F0),
+                Color(0xFFF1F5F9),
               ],
             ),
           ),
         ),
-        // Animated Shapes
-        ...List.generate(5, (index) {
+        // Floating Tech Icons
+        ...List.generate(6, (index) {
+          final icons = [
+            FontAwesomeIcons.code,
+            FontAwesomeIcons.mobile,
+            FontAwesomeIcons.server,
+            FontAwesomeIcons.shield,
+            FontAwesomeIcons.globe,
+            FontAwesomeIcons.microchip,
+          ];
+          
           return AnimatedBuilder(
             animation: _animations[index],
             builder: (context, child) {
               return Positioned(
-                left: index * 200.0 + math.sin(_animations[index].value) * 50,
-                top: index * 150.0 + math.cos(_animations[index].value) * 50,
-                child: Transform.rotate(
-                  angle: _animations[index].value,
-                  child: Container(
-                    width: 100 + index * 20.0,
-                    height: 100 + index * 20.0,
-                    decoration: BoxDecoration(
-                      shape: index % 2 == 0 ? BoxShape.circle : BoxShape.rectangle,
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.blue.withOpacity(0.03),
-                          Colors.purple.withOpacity(0.03),
-                        ],
-                      ),
-                      borderRadius: index % 2 == 0 ? null : BorderRadius.circular(20),
+                left: (index * 180.0) % MediaQuery.of(context).size.width + 
+                      math.sin(_animations[index].value) * 60,
+                top: 80 + index * 120.0 + math.cos(_animations[index].value) * 40,
+                child: Opacity(
+                  opacity: 0.08,
+                  child: Transform.rotate(
+                    angle: _animations[index].value * 0.5,
+                    child: Icon(
+                      icons[index],
+                      size: 80 + (index * 15.0),
+                      color: [
+                        Colors.blue,
+                        Colors.purple,
+                        Colors.orange,
+                        Colors.teal,
+                        Colors.indigo,
+                        Colors.red
+                      ][index].withOpacity(0.4),
                     ),
                   ),
                 ),
@@ -184,7 +196,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
   }
 }
 
-// Glassmorphism Card
+// Enhanced Glassmorphism Card
 class GlassmorphicCard extends StatelessWidget {
   final Widget child;
   final double? width;
@@ -194,6 +206,7 @@ class GlassmorphicCard extends StatelessWidget {
   final double blur;
   final double opacity;
   final BorderRadius? borderRadius;
+  final List<Color>? gradientColors;
   
   const GlassmorphicCard({
     Key? key,
@@ -202,9 +215,10 @@ class GlassmorphicCard extends StatelessWidget {
     this.height,
     this.padding,
     this.margin,
-    this.blur = 10,
+    this.blur = 15,
     this.opacity = 0.1,
     this.borderRadius,
+    this.gradientColors,
   }) : super(key: key);
   
   @override
@@ -214,18 +228,33 @@ class GlassmorphicCard extends StatelessWidget {
       height: height,
       margin: margin,
       child: ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(20),
+        borderRadius: borderRadius ?? BorderRadius.circular(25),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(opacity),
-              borderRadius: borderRadius ?? BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors ?? [
+                  Colors.white.withOpacity(opacity),
+                  Colors.white.withOpacity(opacity * 0.8),
+                ],
+              ),
+              borderRadius: borderRadius ?? BorderRadius.circular(25),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.3),
                 width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                  offset: Offset(0, 10),
+                ),
+              ],
             ),
             child: child,
           ),
@@ -247,18 +276,31 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
   late List<AnimationController> _cardControllers;
   late AnimationController _scrollController;
   late AnimationController _pulseController;
+  late AnimationController _marqueeController;
+  late Animation<double> _marqueeAnimation;
+  late AnimationController _floatingController;
   ScrollController _pageScrollController = ScrollController();
   
   String selectedCategory = 'All';
   double _scrollOffset = 0.0;
   bool _showScrollToTop = false;
   
+  // Marquee announcements
+  final List<String> announcements = [
+    "🔥 MEGA SALE: 75% OFF on all premium services!",
+    "🚀 New AI-powered solutions now available",
+    "💡 Free consultation for enterprise clients",
+    "⚡ 24/7 support with 99.9% uptime guarantee",
+    "🎯 Custom solutions starting from \$99",
+    "🌟 Award-winning development team",
+  ];
+  
   // Stats for animated counters
   final List<Map<String, dynamic>> stats = [
-    {'number': 500, 'suffix': '+', 'label': 'Happy Clients'},
-    {'number': 50, 'suffix': '+', 'label': 'Projects Completed'},
-    {'number': 24, 'suffix': '/7', 'label': 'Support Available'},
-    {'number': 99, 'suffix': '%', 'label': 'Client Satisfaction'},
+    {'number': 500, 'suffix': '+', 'label': 'Happy Clients', 'icon': FontAwesomeIcons.users},
+    {'number': 50, 'suffix': '+', 'label': 'Projects Completed', 'icon': FontAwesomeIcons.projectDiagram},
+    {'number': 24, 'suffix': '/7', 'label': 'Support Available', 'icon': FontAwesomeIcons.headset},
+    {'number': 99, 'suffix': '%', 'label': 'Client Satisfaction', 'icon': FontAwesomeIcons.star},
   ];
   
   final List<Service> services = [
@@ -334,7 +376,27 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     );
     
     _pulseController = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    // Marquee animation
+    _marqueeController = AnimationController(
+      duration: Duration(seconds: 25),
+      vsync: this,
+    )..repeat();
+    
+    _marqueeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _marqueeController,
+      curve: Curves.linear,
+    ));
+    
+    // Floating animation
+    _floatingController = AnimationController(
+      duration: Duration(seconds: 4),
       vsync: this,
     )..repeat(reverse: true);
     
@@ -371,6 +433,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     _controller.dispose();
     _scrollController.dispose();
     _pulseController.dispose();
+    _marqueeController.dispose();
+    _floatingController.dispose();
     _pageScrollController.dispose();
     for (var controller in _cardControllers) {
       controller.dispose();
@@ -389,10 +453,11 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     return desktop;
   }
 
-  EdgeInsets getResponsivePadding(BuildContext context) {
-    if (isMobile(context)) return EdgeInsets.symmetric(horizontal: 20, vertical: 40);
-    if (isTablet(context)) return EdgeInsets.symmetric(horizontal: 40, vertical: 60);
-    return EdgeInsets.symmetric(horizontal: 80, vertical: 80);
+  EdgeInsets getResponsivePadding(BuildContext context, {bool compact = false}) {
+    final multiplier = compact ? 0.5 : 1.0;
+    if (isMobile(context)) return EdgeInsets.symmetric(horizontal: 20, vertical: (35 * multiplier));
+    if (isTablet(context)) return EdgeInsets.symmetric(horizontal: 40, vertical: (45 * multiplier));
+    return EdgeInsets.symmetric(horizontal: 80, vertical: (55 * multiplier));
   }
 
   Widget _buildMobileDrawer() {
@@ -442,14 +507,14 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             _buildDrawerItem(Icons.info, 'About', null, context),
             _buildDrawerItem(Icons.contact_mail, 'Contact', '/contact', context),
             Divider(),
-            _buildDrawerItem(Icons.login, 'Login', '/unified-login', context, isSpecial: true),
+            _buildDrawerItem(Icons.login, 'Login', null, context, isSpecial: true, isLogin: true),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, String? route, BuildContext context, {bool isHighlighted = false, bool isSpecial = false}) {
+  Widget _buildDrawerItem(IconData icon, String title, String? route, BuildContext context, {bool isHighlighted = false, bool isSpecial = false, bool isLogin = false}) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -470,7 +535,10 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
         ),
         onTap: () {
           Navigator.pop(context);
-          if (route != null) {
+          if (isLogin) {
+            // Show login popup instead of navigating
+            LoginPopupModal.show(context);
+          } else if (route != null) {
             if (route == '/') {
               Navigator.pushReplacementNamed(context, route);
             } else {
@@ -497,90 +565,147 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
               controller: _pageScrollController,
               child: Column(
                 children: [
+                  _buildMarqueeBar(),
                   _buildEnhancedHeroSection(),
                   _buildFeaturedProducts(),
                   _buildEnhancedServicesSection(),
                   _buildPaymentSection(),
                   _buildTestimonialsSection(),
-                   _buildStatsSection(context),
+                  _buildStatsSection(context),
                   _buildFooter(),
                 ],
               ),
             ),
           ),
           // Floating Chat Widget
-         AIFloatingChatWidget(),
+          AIFloatingChatWidget(),
           // Scroll to Top Button
-   
+        
         ],
       ),
     );
   }
 
+  Widget _buildMarqueeBar() {
+    return Container(
+      height: 55,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF667EEA),
+            Color(0xFF764BA2),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.4),
+            blurRadius: 20,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: _marqueeAnimation,
+          builder: (context, child) {
+            return Stack(
+              children: [
+                Positioned(
+                  left: _getMarqueePosition(),
+                  child: Row(
+                    children: [
+                      // First set
+                      ...announcements.map((announcement) => _buildMarqueeItem(announcement)).toList(),
+                      // Duplicate for seamless loop
+                      ...announcements.map((announcement) => _buildMarqueeItem(announcement)).toList(),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMarqueeItem(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 80),
+      child: Row(
+        children: [
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: 1.0 + (_pulseController.value * 0.2),
+                child: Icon(Icons.campaign, color: Colors.white, size: 22),
+              );
+            },
+          ),
+          SizedBox(width: 12),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  double _getMarqueePosition() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final totalWidth = announcements.length * 400.0 * 2; // Approximate width
+    return -((_marqueeAnimation.value * totalWidth) % totalWidth) + screenWidth;
+  }
+
   Widget _buildEnhancedHeroSection() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final heroHeight = isMobile(context) ? screenHeight * 0.9 : screenHeight * 0.8;
+    final heroHeight = isMobile(context) ? screenHeight * 0.85 : screenHeight * 0.75;
     
     return Container(
       height: heroHeight,
       child: Stack(
         children: [
-          // Parallax Background
-          Transform.translate(
-            offset: Offset(0, _scrollOffset * 0.5),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF3949AB).withOpacity(0.1),
-                    Color(0xFF5C6BC0).withOpacity(0.1),
-                    Color(0xFF7986CB).withOpacity(0.1),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Floating Elements
-          ...List.generate(3, (index) {
-            return Positioned(
-              left: index * 200.0,
-              top: 100 + index * 50.0 - (_scrollOffset * 0.3),
-              child: AnimatedBuilder(
-                animation: _pulseController,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(
-                      math.sin(_pulseController.value * 2 * math.pi) * 20,
-                      math.cos(_pulseController.value * 2 * math.pi) * 20,
-                    ),
-                    child: Container(
-                      width: 80 + index * 20.0,
-                      height: 80 + index * 20.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.blue.withOpacity(0.3),
-                            Colors.purple.withOpacity(0.1),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.2),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
+          // Enhanced Background with animated orbs
+          ...List.generate(5, (index) {
+            return AnimatedBuilder(
+              animation: _floatingController,
+              builder: (context, child) {
+                return Positioned(
+                  left: (index * 220.0) + (_floatingController.value * 80),
+                  top: 120 + (index * 60.0) + (math.sin(_floatingController.value * 2 * math.pi + index) * 40),
+                  child: Container(
+                    width: 140 - (index * 25.0),
+                    height: 140 - (index * 25.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          [Colors.blue, Colors.purple, Colors.orange, Colors.teal, Colors.pink][index].withOpacity(0.15),
+                          [Colors.blue, Colors.purple, Colors.orange, Colors.teal, Colors.pink][index].withOpacity(0.05),
                         ],
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: [Colors.blue, Colors.purple, Colors.orange, Colors.teal, Colors.pink][index].withOpacity(0.3),
+                          blurRadius: 40,
+                          spreadRadius: 10,
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             );
           }),
-          // Content
+          
+          // Main Content
           Center(
             child: FadeTransition(
               opacity: _controller,
@@ -589,6 +714,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Enhanced Offer Badge
                     ScaleTransition(
                       scale: CurvedAnimation(
                         parent: _controller,
@@ -596,63 +722,106 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                       ),
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isMobile(context) ? 15 : 20, 
-                          vertical: isMobile(context) ? 8 : 10
+                          horizontal: isMobile(context) ? 25 : 35, 
+                          vertical: isMobile(context) ? 15 : 18
                         ),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.orange, Colors.deepOrange],
+                            colors: [
+                              Color(0xFFFF6B6B),
+                              Color(0xFFFF8E53),
+                            ],
                           ),
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(50),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.orange.withOpacity(0.5),
-                              blurRadius: 20,
-                              spreadRadius: 2,
+                              color: Colors.orange.withOpacity(0.6),
+                              blurRadius: 30,
+                              spreadRadius: 5,
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.local_fire_department, color: Colors.white, size: 20),
-                            SizedBox(width: 5),
+                            AnimatedBuilder(
+                              animation: _pulseController,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: 1.0 + (_pulseController.value * 0.3),
+                                  child: Icon(Icons.local_fire_department, 
+                                      color: Colors.white, size: 26),
+                                );
+                              },
+                            ),
+                            SizedBox(width: 12),
                             Text(
-                              '🔥 Special Launch Offer - Up to 75% OFF!',
+                              '🔥 ULTIMATE SALE - UP TO 75% OFF!',
                               style: TextStyle(
                                 fontSize: getResponsiveFontSize(context, 
-                                  mobile: 12, tablet: 14, desktop: 16),
+                                  mobile: 14, tablet: 16, desktop: 18),
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(height: isMobile(context) ? 20 : 30),
-                    SizedBox(
-                      height: isMobile(context) ? 60 : 80,
+                    
+                    SizedBox(height: 40),
+                    
+                    // Enhanced Animated Title
+                    Container(
+                      height: isMobile(context) ? 85 : 110,
                       child: DefaultTextStyle(
                         style: TextStyle(
                           fontSize: getResponsiveFontSize(context,
-                            mobile: 28, tablet: 36, desktop: 48),
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                            mobile: 34, tablet: 44, desktop: 58),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.5,
+                          height: 1.1,
                         ),
                         child: AnimatedTextKit(
                           repeatForever: true,
+                          pause: Duration(milliseconds: 1200),
                           animatedTexts: [
-                            TypewriterAnimatedText('Innovative IT Solutions'),
-                            TypewriterAnimatedText('Expert Consultation'),
-                            TypewriterAnimatedText('Digital Transformation'),
-                            TypewriterAnimatedText('Future-Ready Technology'),
+                            TypewriterAnimatedText(
+                              'Revolutionary IT Solutions',
+                              textStyle: TextStyle(
+                                foreground: Paint()
+                                  ..shader = LinearGradient(
+                                    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                              ),
+                            ),
+                            TypewriterAnimatedText(
+                              'Future-Ready Technology',
+                              textStyle: TextStyle(
+                                foreground: Paint()
+                                  ..shader = LinearGradient(
+                                    colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                              ),
+                            ),
+                            TypewriterAnimatedText(
+                              'Digital Transformation',
+                              textStyle: TextStyle(
+                                foreground: Paint()
+                                  ..shader = LinearGradient(
+                                    colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+                                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    
+                    SizedBox(height: 30),
+                    
+                    // Enhanced Subtitle
                     SlideTransition(
                       position: Tween<Offset>(
                         begin: Offset(0, 1),
@@ -661,33 +830,41 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                         parent: _controller,
                         curve: Curves.easeOutCubic,
                       )),
-                      child: Text(
-                        'Transform your business with our comprehensive IT services',
-                        style: TextStyle(
-                          fontSize: getResponsiveFontSize(context,
-                            mobile: 16, tablet: 18, desktop: 20),
-                          color: Colors.grey.shade700,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          'Elevate your business with cutting-edge technology solutions designed for tomorrow\'s challenges',
+                          style: TextStyle(
+                            fontSize: getResponsiveFontSize(context,
+                              mobile: 18, tablet: 21, desktop: 24),
+                            color: Colors.grey.shade600,
+                            height: 1.6,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(height: isMobile(context) ? 30 : 40),
+                    
+                    SizedBox(height: 50),
+                    
+                    // Enhanced CTA Buttons
                     Wrap(
-                      spacing: 20,
-                      runSpacing: 20,
+                      spacing: 25,
+                      runSpacing: 25,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildHeroButton(
-                          'Shop Now',
-                          Icons.shopping_bag,
-                          Colors.orange,
+                        _buildEnhancedHeroButton(
+                          'Explore Products',
+                          Icons.rocket_launch,
+                          [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
                           () => Navigator.pushNamed(context, '/products'),
                           true,
                         ),
-                        _buildHeroButton(
-                          'View Services',
-                          Icons.design_services,
-                          Colors.blue.shade700,
+                        _buildEnhancedHeroButton(
+                          'Our Services',
+                          Icons.stars,
+                          [Color(0xFF667EEA), Color(0xFF764BA2)],
                           () => Navigator.pushNamed(context, '/services'),
                           false,
                         ),
@@ -703,7 +880,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     );
   }
 
-  Widget _buildHeroButton(String text, IconData icon, Color color, VoidCallback onPressed, bool filled) {
+  Widget _buildEnhancedHeroButton(String text, IconData icon, List<Color> colors, VoidCallback onPressed, bool filled) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -713,58 +890,80 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             cursor: SystemMouseCursors.click,
             child: AnimatedContainer(
               duration: Duration(milliseconds: 300),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors[0].withOpacity(0.4),
+                    blurRadius: 25,
+                    spreadRadius: 3,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
               child: filled
-                  ? ElevatedButton(
-                      onPressed: onPressed,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: color,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile(context) ? 30 : 40,
-                          vertical: isMobile(context) ? 15 : 20,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 8,
+                  ? Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: colors),
+                        borderRadius: BorderRadius.circular(50),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon),
-                          SizedBox(width: 10),
-                          Text(
-                            text,
-                            style: TextStyle(
-                              fontSize: isMobile(context) ? 16 : 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      child: ElevatedButton(
+                        onPressed: onPressed,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile(context) ? 40 : 50,
+                            vertical: isMobile(context) ? 20 : 25,
                           ),
-                        ],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(icon, size: 22),
+                            SizedBox(width: 12),
+                            Text(
+                              text,
+                              style: TextStyle(
+                                fontSize: isMobile(context) ? 16 : 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   : OutlinedButton(
                       onPressed: onPressed,
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: color, width: 2),
+                        side: BorderSide(color: colors[0], width: 2.5),
                         padding: EdgeInsets.symmetric(
-                          horizontal: isMobile(context) ? 30 : 40,
-                          vertical: isMobile(context) ? 15 : 20,
+                          horizontal: isMobile(context) ? 40 : 50,
+                          vertical: isMobile(context) ? 20 : 25,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(50),
                         ),
+                        backgroundColor: Colors.white.withOpacity(0.1),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(icon, color: color),
-                          SizedBox(width: 10),
+                          Icon(icon, color: colors[0], size: 22),
+                          SizedBox(width: 12),
                           Text(
                             text,
                             style: TextStyle(
                               fontSize: isMobile(context) ? 16 : 18,
-                              color: color,
+                              color: colors[0],
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
@@ -777,98 +976,29 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     );
   }
 
- 
-
-  Widget _buildStatCard(Map<String, dynamic> stat) {
-    return GlassmorphicCard(
-      padding: EdgeInsets.all(20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TweenAnimationBuilder<int>(
-            tween: IntTween(begin: 0, end: stat['number']),
-            duration: Duration(seconds: 2),
-            builder: (context, value, child) {
-              return Text(
-                '$value${stat['suffix']}',
-                style: TextStyle(
-                  fontSize: getResponsiveFontSize(context,
-                    mobile: 24, tablet: 28, desktop: 32),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              );
-            },
-          ),
-          SizedBox(height: 5),
-          Text(
-            stat['label'],
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 12, tablet: 13, desktop: 14),
-              color: Colors.white70,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFeaturedProducts() {
     return Container(
       padding: getResponsivePadding(context),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
             Colors.orange.shade50,
-            Colors.orange.shade100,
+            Colors.orange.shade100.withOpacity(0.3),
           ],
         ),
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedBuilder(
-                animation: _pulseController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: 1.0 + (_pulseController.value * 0.2),
-                    child: Icon(
-                      Icons.local_fire_department,
-                      color: Colors.orange,
-                      size: 35,
-                    ),
-                  );
-                },
-              ),
-              SizedBox(width: 10),
-              Text(
-                'Hot Deals',
-                style: TextStyle(
-                  fontSize: getResponsiveFontSize(context,
-                    mobile: 32, tablet: 36, desktop: 40),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Text(
+          // Enhanced Section Header
+          _buildSectionHeader(
+            '🔥 Hot Deals',
             'Limited time offers on our most popular products',
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 16, tablet: 17, desktop: 18),
-              color: Colors.grey.shade700,
-            ),
-            textAlign: TextAlign.center,
+            Colors.orange,
           ),
-          SizedBox(height: isMobile(context) ? 30 : 40),
+          
+          SizedBox(height: 40),
           
           StreamBuilder<QuerySnapshot>(
             stream: _firestore
@@ -898,203 +1028,294 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
               );
             },
           ),
-          SizedBox(height: 30),
-          TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/products'),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'View All Products',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange,
-                  ),
-                ),
-                SizedBox(width: 5),
-                Icon(Icons.arrow_forward, color: Colors.orange, size: 18),
-              ],
-            ),
-          ),
+          
+          SizedBox(height: 35),
+          
+          _buildViewAllButton('View All Products', '/products', Colors.orange),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, String subtitle, Color color) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedBuilder(
+              animation: _pulseController,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: 1.0 + (_pulseController.value * 0.2),
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        colors: [
+                          color.withOpacity(0.3),
+                          color.withOpacity(0.1),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.4),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Icon(Icons.local_fire_department, color: color, size: 38),
+                  ),
+                );
+              },
+            ),
+            SizedBox(width: 15),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: getResponsiveFontSize(context,
+                  mobile: 30, tablet: 34, desktop: 38),
+                fontWeight: FontWeight.w900,
+                color: Colors.grey.shade800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 18),
+        Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: getResponsiveFontSize(context,
+              mobile: 16, tablet: 18, desktop: 20),
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildViewAllButton(String text, String route, Color color) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, route),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [color.withOpacity(0.1), Colors.white.withOpacity(0.1)],
+            ),
+            borderRadius: BorderRadius.circular(35),
+            border: Border.all(color: color.withOpacity(0.3), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.2),
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              SizedBox(width: 10),
+              Icon(Icons.arrow_forward, color: color, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildEnhancedProductCard(Map<String, dynamic> data) {
     return Container(
-      width: isMobile(context) ? 280 : 320,
-      margin: EdgeInsets.only(right: 20),
+      width: isMobile(context) ? 290 : 330,
+      margin: EdgeInsets.only(right: 25),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
-          transform: Matrix4.identity()..scale(1.0),
-          child: Stack(
+        child: GlassmorphicCard(
+          padding: EdgeInsets.zero,
+          gradientColors: [
+            Colors.white.withOpacity(0.9),
+            Colors.white.withOpacity(0.7),
+          ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      spreadRadius: 5,
-                      blurRadius: 20,
-                      offset: Offset(0, 10),
+              Stack(
+                children: [
+                  Container(
+                    height: 220,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                      image: DecorationImage(
+                        image: NetworkImage(data['image'] ?? ''),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            height: 200,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(data['image'] ?? ''),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          // Gradient Overlay
-                          Container(
-                            height: 200,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.3),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (data['discount'] != null)
-                            Positioned(
-                              top: 10,
-                              left: 10,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.red, Colors.red.shade700],
-                                  ),
-                                  borderRadius: BorderRadius.circular(25),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.red.withOpacity(0.5),
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  '${data['discount']}% OFF',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          if (data['badge'] != null)
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: _getBadgeColor(data['badgeColor']),
-                                  borderRadius: BorderRadius.circular(25),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: _getBadgeColor(data['badgeColor']).withOpacity(0.5),
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  data['badge'],
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
+                  ),
+                  Container(
+                    height: 220,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.4),
                         ],
                       ),
-                      Container(
-                        color: Colors.white,
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              data['name'] ?? '',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade800,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Text(
-                                  "\$${data['price']}",
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                if (data['originalPrice'] != null)
-                                  Text(
-                                    "\$${data['originalPrice']}",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey.shade500,
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            SizedBox(height: 15),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () => Navigator.pushNamed(context, '/products'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  elevation: 5,
-                                ),
-                                child: Text(
-                                  'View Details',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
+                    ),
+                  ),
+                  if (data['discount'] != null)
+                    Positioned(
+                      top: 15,
+                      left: 15,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.6),
+                              blurRadius: 15,
+                              spreadRadius: 2,
                             ),
                           ],
                         ),
+                        child: Text(
+                          '${data['discount']}% OFF',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  if (data['badge'] != null)
+                    Positioned(
+                      top: 15,
+                      right: 15,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _getBadgeColor(data['badgeColor']),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _getBadgeColor(data['badgeColor']).withOpacity(0.5),
+                              blurRadius: 10,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          data['badge'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.all(25),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data['name'] ?? '',
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Text(
+                          "\$${data['price']}",
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        if (data['originalPrice'] != null)
+                          Text(
+                            "\$${data['originalPrice']}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade500,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.orange, Colors.deepOrange],
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orange.withOpacity(0.4),
+                              blurRadius: 15,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pushNamed(context, '/products'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                          ),
+                          child: Text(
+                            'View Details',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1106,20 +1327,13 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
 
   Color _getBadgeColor(String? color) {
     switch (color) {
-      case 'orange':
-        return Colors.orange;
-      case 'blue':
-        return Colors.blue;
-      case 'red':
-        return Colors.red;
-      case 'green':
-        return Colors.green;
-      case 'purple':
-        return Colors.purple;
-      case 'indigo':
-        return Colors.indigo;
-      default:
-        return Colors.grey;
+      case 'orange': return Colors.orange;
+      case 'blue': return Colors.blue;
+      case 'red': return Colors.red;
+      case 'green': return Colors.green;
+      case 'purple': return Colors.purple;
+      case 'indigo': return Colors.indigo;
+      default: return Colors.grey;
     }
   }
 
@@ -1128,34 +1342,22 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
       padding: getResponsivePadding(context),
       child: Column(
         children: [
-          Text(
+          _buildSectionHeader(
             'Our Services',
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 32, tablet: 36, desktop: 40),
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
             'Comprehensive IT solutions tailored for your business needs',
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 16, tablet: 17, desktop: 18),
-              color: Colors.grey.shade700,
-            ),
-            textAlign: TextAlign.center,
+            Colors.blue,
           ),
-          SizedBox(height: isMobile(context) ? 40 : 60),
+          
+          SizedBox(height: 50),
+          
           GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: isMobile(context) ? 1 : 
                               isTablet(context) ? 2 : 4,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
+              crossAxisSpacing: 25,
+              mainAxisSpacing: 25,
               childAspectRatio: isMobile(context) ? 1.5 : 1.2,
             ),
             itemCount: services.length,
@@ -1168,107 +1370,6 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     );
   }
 
-Widget _buildStatsSection(BuildContext context) {
-  return Container(
-    width: double.infinity,
-    padding: getResponsivePadding(context),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.indigo.shade900.withOpacity(0.95),
-          Colors.blueAccent.shade700.withOpacity(0.85),
-        ],
-      ),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          '🌟 Our Achievements',
-          style: TextStyle(
-            fontSize: getResponsiveFontSize(context,
-              mobile: 26, tablet: 30, desktop: 36),
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.2,
-            color: Colors.white,
-          ),
-        ),
-        SizedBox(height: 30),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isMobile(context) ? 2 : 4,
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
-            childAspectRatio: 1.3,
-          ),
-          itemCount: stats.length,
-          itemBuilder: (context, index) {
-            final statMap = stats[index];
-            final stat = Stat(
-              icon: FontAwesomeIcons.award, // Replace with appropriate icon if available in statMap
-              value: '${statMap['number']}${statMap['suffix']}',
-              label: statMap['label'],
-            );
-            return _buildGlassmorphicStatCard(stat);
-          },
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildGlassmorphicStatCard(Stat stat) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(20),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withOpacity(0.1),
-              Colors.white.withOpacity(0.05),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
-        ),
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(stat.icon, size: 40, color: Colors.white),
-            SizedBox(height: 12),
-            Text(
-              stat.value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              stat.label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
   Widget _buildEnhancedServiceCard(Service service, int index) {
     return AnimatedBuilder(
       animation: _cardControllers[index],
@@ -1279,30 +1380,15 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
             opacity: _cardControllers[index].value,
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white,
-                      Colors.grey.shade50,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: service.color.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 15,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
+              child: GlassmorphicCard(
+                padding: EdgeInsets.all(25),
+                gradientColors: [
+                  Colors.white.withOpacity(0.9),
+                  service.color.withOpacity(0.05),
+                ],
                 child: InkWell(
                   onTap: () => Navigator.pushNamed(context, '/services'),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(25),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -1312,46 +1398,51 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
                           return Transform.scale(
                             scale: 1.0 + (_pulseController.value * 0.1),
                             child: Container(
-                              padding: EdgeInsets.all(isMobile(context) ? 15 : 20),
+                              padding: EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
+                                gradient: RadialGradient(
                                   colors: [
                                     service.color.withOpacity(0.2),
-                                    service.color.withOpacity(0.1),
+                                    service.color.withOpacity(0.05),
                                   ],
                                 ),
                                 shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: service.color.withOpacity(0.3),
+                                    blurRadius: 20,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
                               ),
                               child: Icon(
                                 service.icon,
-                                size: isMobile(context) ? 30 : 40,
+                                size: isMobile(context) ? 35 : 40,
                                 color: service.color,
                               ),
                             ),
                           );
                         },
                       ),
-                      SizedBox(height: isMobile(context) ? 15 : 20),
+                      SizedBox(height: 22),
                       Text(
                         service.title,
                         style: TextStyle(
-                          fontSize: isMobile(context) ? 16 : 18,
+                          fontSize: isMobile(context) ? 17 : 19,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: isMobile(context) ? 15 : 20),
-                        child: Text(
-                          service.description,
-                          style: TextStyle(
-                            fontSize: isMobile(context) ? 12 : 14,
-                            color: Colors.grey.shade600,
-                          ),
-                          textAlign: TextAlign.center,
+                      SizedBox(height: 12),
+                      Text(
+                        service.description,
+                        style: TextStyle(
+                          fontSize: isMobile(context) ? 14 : 15,
+                          color: Colors.grey.shade600,
+                          height: 1.4,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -1379,75 +1470,58 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
+            Colors.grey.shade50,
             Colors.grey.shade100,
-            Colors.grey.shade200,
           ],
         ),
       ),
       child: Column(
         children: [
-          Text(
+          _buildSectionHeader(
             'Secure Payment Options',
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 32, tablet: 36, desktop: 40),
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          Text(
             'Multiple payment gateways for your convenience',
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 16, tablet: 17, desktop: 18),
-              color: Colors.grey.shade700,
-            ),
-            textAlign: TextAlign.center,
+            Colors.green,
           ),
-          SizedBox(height: isMobile(context) ? 40 : 60),
+          
+          SizedBox(height: 50),
+          
           Wrap(
-            spacing: 20,
-            runSpacing: 20,
+            spacing: 25,
+            runSpacing: 25,
             alignment: WrapAlignment.center,
             children: paymentMethods.map((method) {
               return MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  padding: EdgeInsets.all(isMobile(context) ? 25 : 30),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white,
-                        Colors.grey.shade50,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: (method['color'] as Color).withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 15,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                  ),
+                child: GlassmorphicCard(
+                  padding: EdgeInsets.all(30),
+                  gradientColors: [
+                    Colors.white,
+                    (method['color'] as Color).withOpacity(0.05),
+                  ],
                   child: Column(
                     children: [
-                      Icon(
-                        method['icon'] as IconData,
-                        size: isMobile(context) ? 40 : 50,
-                        color: method['color'] as Color,
+                      Container(
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            colors: [
+                              (method['color'] as Color).withOpacity(0.2),
+                              (method['color'] as Color).withOpacity(0.05),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          method['icon'] as IconData,
+                          size: isMobile(context) ? 40 : 45,
+                          color: method['color'] as Color,
+                        ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 15),
                       Text(
                         method['name'] as String,
                         style: TextStyle(
-                          fontSize: isMobile(context) ? 14 : 16,
+                          fontSize: isMobile(context) ? 15 : 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey.shade800,
                         ),
@@ -1469,68 +1543,76 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
         'name': 'John Doe',
         'company': 'Tech Corp',
         'image': 'https://i.pravatar.cc/150?img=1',
-        'text': 'Excellent service! They transformed our entire IT infrastructure.',
+        'text': 'Excellent service! They transformed our entire IT infrastructure with cutting-edge solutions.',
         'rating': 5,
       },
       {
         'name': 'Jane Smith',
         'company': 'StartUp Inc',
         'image': 'https://i.pravatar.cc/150?img=2',
-        'text': 'Professional team with innovative solutions. Highly recommended!',
+        'text': 'Professional team with innovative solutions. Highly recommended for any tech challenges!',
         'rating': 5,
       },
       {
         'name': 'Mike Johnson',
         'company': 'Enterprise Ltd',
         'image': 'https://i.pravatar.cc/150?img=3',
-        'text': 'Their IoT solutions helped us automate our entire workflow.',
+        'text': 'Their IoT solutions helped us automate our entire workflow. Amazing results!',
         'rating': 5,
       },
     ];
 
     return Container(
-      padding: getResponsivePadding(context),
+      padding: getResponsivePadding(context, compact: true), // Reduced padding
       child: Column(
         children: [
-          Text(
-            'What Our Clients Say',
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 32, tablet: 36, desktop: 40),
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
+          _buildSectionHeader(
+            '💬 What Our Clients Say',
+            'Real feedback from our satisfied customers',
+            Colors.purple,
           ),
-          SizedBox(height: isMobile(context) ? 40 : 60),
+          
+          SizedBox(height: 35), // Reduced spacing
+          
           CarouselSlider(
             options: CarouselOptions(
-              height: isMobile(context) ? 400 : 350,
               autoPlay: true,
-              autoPlayInterval: Duration(seconds: 5),
+              autoPlayInterval: Duration(seconds: 4),
               enlargeCenterPage: true,
               viewportFraction: isMobile(context) ? 0.9 : 0.5,
+              enableInfiniteScroll: true,
+              height: isMobile(context) ? 320 : 350,
             ),
             items: testimonials.map((testimonial) {
               return GlassmorphicCard(
                 margin: EdgeInsets.symmetric(horizontal: 10),
-                padding: EdgeInsets.all(isMobile(context) ? 20 : 30),
+                padding: EdgeInsets.all(25),
+                gradientColors: [
+                  Colors.white.withOpacity(0.9),
+                  Colors.purple.withOpacity(0.05),
+                ],
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.purple.withOpacity(0.3),
+                            Colors.purple.withOpacity(0.1),
+                          ],
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withOpacity(0.3),
+                            color: Colors.purple.withOpacity(0.4),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
                         ],
                       ),
                       child: CircleAvatar(
-                        radius: isMobile(context) ? 40 : 50,
+                        radius: isMobile(context) ? 35 : 40,
                         backgroundImage: NetworkImage(testimonial['image'] as String),
                       ),
                     ),
@@ -1540,8 +1622,10 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
                       children: List.generate(5, (index) {
                         return Icon(
                           Icons.star,
-                          color: index < (testimonial['rating'] as int) ? Colors.amber : Colors.grey.shade300,
-                          size: 20,
+                          color: index < (testimonial['rating'] as int)
+                              ? Colors.amber
+                              : Colors.grey.shade300,
+                          size: 22,
                         );
                       }),
                     ),
@@ -1552,6 +1636,7 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
                         fontSize: isMobile(context) ? 14 : 16,
                         fontStyle: FontStyle.italic,
                         color: Colors.grey.shade700,
+                        height: 1.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -1564,11 +1649,13 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
                         color: Colors.black87,
                       ),
                     ),
+                    SizedBox(height: 5),
                     Text(
                       testimonial['company'] as String,
                       style: TextStyle(
                         fontSize: isMobile(context) ? 12 : 14,
                         color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -1580,6 +1667,143 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
       ),
     );
   }
+
+  Widget _buildStatsSection(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: getResponsivePadding(context, compact: true), // Reduced padding
+      margin: EdgeInsets.only(top: 15), // Reduced top margin
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF667EEA),
+            Color(0xFF764BA2),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.3),
+            blurRadius: 30,
+            spreadRadius: 10,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '🏆 Our Achievements',
+            style: TextStyle(
+              fontSize: getResponsiveFontSize(context,
+                mobile: 30, tablet: 34, desktop: 38),
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 15),
+          Text(
+            'Numbers that speak for our excellence',
+            style: TextStyle(
+              fontSize: getResponsiveFontSize(context,
+                mobile: 16, tablet: 18, desktop: 20),
+              color: Colors.white70,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 35), // Reduced spacing
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isMobile(context) ? 2 : 4,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+              childAspectRatio: 1.2,
+            ),
+            itemCount: stats.length,
+            itemBuilder: (context, index) {
+              final statMap = stats[index];
+              return _buildGlassmorphicStatCard(statMap);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGlassmorphicStatCard(Map<String, dynamic> statMap) {
+    return GlassmorphicCard(
+      padding: EdgeInsets.all(20),
+      gradientColors: [
+        Colors.white.withOpacity(0.2),
+        Colors.white.withOpacity(0.1),
+      ],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: 1.0 + (_pulseController.value * 0.1),
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.3),
+                        Colors.white.withOpacity(0.1),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    statMap['icon'] as IconData,
+                    size: 35,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
+          ),
+          SizedBox(height: 15),
+          TweenAnimationBuilder<int>(
+            tween: IntTween(begin: 0, end: statMap['number']),
+            duration: Duration(seconds: 2),
+            builder: (context, value, child) {
+              return Text(
+                '$value${statMap['suffix']}',
+                style: TextStyle(
+                  fontSize: getResponsiveFontSize(context,
+                    mobile: 26, tablet: 30, desktop: 34),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              );
+            },
+          ),
+          SizedBox(height: 8),
+          Text(
+            statMap['label'],
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: getResponsiveFontSize(context,
+                mobile: 13, tablet: 14, desktop: 15),
+              color: Colors.white70,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+ 
 
   Widget _buildFooter() {
     return Container(
@@ -1713,8 +1937,8 @@ Widget _buildGlassmorphicStatCard(Stat stat) {
           SizedBox(height: 40),
           Divider(color: Colors.grey.shade700),
           SizedBox(height: 20),
-          Text(
-            '© 2024 AppTech Vibe. All rights reserved.',
+         Text(
+            '© ${DateTime.now().year} AppTech Vibe. All rights reserved.',
             style: TextStyle(color: Colors.grey.shade400, fontSize: isMobile(context) ? 12 : 14),
             textAlign: TextAlign.center,
           ),

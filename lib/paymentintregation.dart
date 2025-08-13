@@ -257,6 +257,7 @@ class _PaymentPageState extends State<PaymentPage> with TickerProviderStateMixin
     
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(

@@ -147,6 +147,7 @@ class _ContactPageState extends State<ContactPage> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(

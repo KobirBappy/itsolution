@@ -3,18 +3,29 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class UnifiedLoginPage extends StatefulWidget {
-  @override
-  _UnifiedLoginPageState createState() => _UnifiedLoginPageState();
+class LoginPopupModal {
+  static void show(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => LoginModalContent(),
+    );
+  }
 }
 
-class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProviderStateMixin {
+class LoginModalContent extends StatefulWidget {
+  @override
+  _LoginModalContentState createState() => _LoginModalContentState();
+}
+
+class _LoginModalContentState extends State<LoginModalContent> with TickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   late TabController _tabController;
   late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
   
   // User Login Controllers
@@ -45,24 +56,24 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 1500),
+      duration: Duration(milliseconds: 600),
       vsync: this,
     );
     
-    _fadeAnimation = Tween<double>(
+    _scaleAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeIn,
+      curve: Curves.elasticOut,
     ));
     
     _slideAnimation = Tween<Offset>(
-      begin: Offset(0, 0.3),
+      begin: Offset(0, 1),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOutCubic,
     ));
     
     _animationController.forward();
@@ -100,6 +111,7 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
           final userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
           
           if (userDoc.exists && userDoc.data()?['role'] == 'customer') {
+            Navigator.pop(context); // Close modal
             Navigator.pushReplacementNamed(context, '/user-dashboard');
           } else {
             // Not a customer account
@@ -142,7 +154,7 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
             'createdAt': FieldValue.serverTimestamp(),
           });
           
-          // Navigate to user dashboard
+          Navigator.pop(context); // Close modal
           Navigator.pushReplacementNamed(context, '/user-dashboard');
         }
       } on FirebaseAuthException catch (e) {
@@ -168,6 +180,7 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
           final userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
           
           if (userDoc.exists && userDoc.data()?['role'] == 'admin') {
+            Navigator.pop(context); // Close modal
             Navigator.pushReplacementNamed(context, '/admin');
           } else {
             // Not an admin account
@@ -215,223 +228,247 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
+    return SlideTransition(
+      position: _slideAnimation,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.85,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.purple.shade50,
-            ],
-          ),
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: Offset(0, -10),
+            ),
+          ],
         ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20),
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Container(
-                    constraints: BoxConstraints(maxWidth: 500),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Logo and Title
-                        Container(
-                          padding: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.2),
-                                blurRadius: 20,
-                                spreadRadius: 5,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            FontAwesomeIcons.code,
-                            size: isMobile(context) ? 50 : 60,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                        SizedBox(height: 30),
-                        Text(
-                          'Welcome to AppTech Vibe',
-                          style: TextStyle(
-                            fontSize: isMobile(context) ? 24 : 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade800,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Login or create an account to continue',
-                          style: TextStyle(
-                            fontSize: isMobile(context) ? 14 : 16,
-                            color: Colors.grey.shade600,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 40),
-                        
-                        // Role Selection
-                        Container(
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 12),
+              width: 50,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(24),
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Column(
+                    children: [
+                      // Header with close button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(width: 40),
+                          Column(
                             children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _selectedRole = 'customer'),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: _selectedRole == 'customer' 
-                                          ? Colors.white 
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(25),
-                                      boxShadow: _selectedRole == 'customer'
-                                          ? [
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(0.2),
-                                                spreadRadius: 2,
-                                                blurRadius: 5,
-                                              ),
-                                            ]
-                                          : [],
+                              Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.blue.shade600, Colors.blue.shade400],
+                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      blurRadius: 15,
+                                      spreadRadius: 2,
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.person,
+                                  ],
+                                ),
+                                child: Icon(
+                                  FontAwesomeIcons.code,
+                                  size: 32,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Welcome Back!',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              Text(
+                                'Sign in to continue',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.close, color: Colors.grey.shade600),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      SizedBox(height: 30),
+                      
+                      // Role Selection with enhanced design
+                      Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.grey.shade100, Colors.grey.shade200],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _selectedRole = 'customer'),
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  padding: EdgeInsets.symmetric(vertical: 14),
+                                  decoration: BoxDecoration(
+                                    gradient: _selectedRole == 'customer' 
+                                        ? LinearGradient(colors: [Colors.blue.shade600, Colors.blue.shade400])
+                                        : null,
+                                    color: _selectedRole == 'customer' 
+                                        ? null 
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: _selectedRole == 'customer'
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.blue.withOpacity(0.3),
+                                              blurRadius: 10,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : [],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.person,
+                                        color: _selectedRole == 'customer' 
+                                            ? Colors.white 
+                                            : Colors.grey.shade600,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Customer',
+                                        style: TextStyle(
                                           color: _selectedRole == 'customer' 
-                                              ? Colors.blue.shade700 
+                                              ? Colors.white 
                                               : Colors.grey.shade600,
-                                          size: 20,
+                                          fontWeight: _selectedRole == 'customer' 
+                                              ? FontWeight.bold 
+                                              : FontWeight.normal,
                                         ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Customer',
-                                          style: TextStyle(
-                                            color: _selectedRole == 'customer' 
-                                                ? Colors.blue.shade700 
-                                                : Colors.grey.shade600,
-                                            fontWeight: _selectedRole == 'customer' 
-                                                ? FontWeight.bold 
-                                                : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _selectedRole = 'admin'),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: _selectedRole == 'admin' 
-                                          ? Colors.white 
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(25),
-                                      boxShadow: _selectedRole == 'admin'
-                                          ? [
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(0.2),
-                                                spreadRadius: 2,
-                                                blurRadius: 5,
-                                              ),
-                                            ]
-                                          : [],
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.admin_panel_settings,
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _selectedRole = 'admin'),
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  padding: EdgeInsets.symmetric(vertical: 14),
+                                  decoration: BoxDecoration(
+                                    gradient: _selectedRole == 'admin' 
+                                        ? LinearGradient(colors: [Colors.purple.shade600, Colors.purple.shade400])
+                                        : null,
+                                    color: _selectedRole == 'admin' 
+                                        ? null 
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: _selectedRole == 'admin'
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.purple.withOpacity(0.3),
+                                              blurRadius: 10,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : [],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.admin_panel_settings,
+                                        color: _selectedRole == 'admin' 
+                                            ? Colors.white 
+                                            : Colors.grey.shade600,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Admin',
+                                        style: TextStyle(
                                           color: _selectedRole == 'admin' 
-                                              ? Colors.purple.shade700 
+                                              ? Colors.white 
                                               : Colors.grey.shade600,
-                                          size: 20,
+                                          fontWeight: _selectedRole == 'admin' 
+                                              ? FontWeight.bold 
+                                              : FontWeight.normal,
                                         ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Admin',
-                                          style: TextStyle(
-                                            color: _selectedRole == 'admin' 
-                                                ? Colors.purple.shade700 
-                                                : Colors.grey.shade600,
-                                            fontWeight: _selectedRole == 'admin' 
-                                                ? FontWeight.bold 
-                                                : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 30),
-                        
-                        // Login Forms
-                        Container(
-                          padding: EdgeInsets.all(isMobile(context) ? 20 : 30),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
-                                spreadRadius: 5,
-                                blurRadius: 15,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: _selectedRole == 'customer' 
-                              ? _buildCustomerForm() 
-                              : _buildAdminForm(),
-                        ),
-                        
-                        // Back to Home
-                        SizedBox(height: 20),
-                        TextButton.icon(
-                          onPressed: () => Navigator.pushReplacementNamed(context, '/'),
-                          icon: Icon(Icons.arrow_back, size: 18),
-                          label: Text('Back to Home'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.grey.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      
+                      SizedBox(height: 30),
+                      
+                      // Forms
+                      _selectedRole == 'customer' 
+                          ? _buildCustomerForm() 
+                          : _buildAdminForm(),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -440,362 +477,55 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
   Widget _buildCustomerForm() {
     return Column(
       children: [
-        // Tab Bar
+        // Tab Bar with enhanced design
         Container(
+          padding: EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
           ),
           child: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
-              color: Colors.blue.shade700,
-              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(colors: [Colors.blue.shade600, Colors.blue.shade400]),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.3),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.grey.shade600,
+            labelStyle: TextStyle(fontWeight: FontWeight.bold),
             tabs: [
               Tab(text: 'Login'),
               Tab(text: 'Register'),
             ],
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 24),
         
         // Tab Views
         SizedBox(
-          height: 400,
+          height: 420,
           child: TabBarView(
             controller: _tabController,
             children: [
               // Login Tab
-              Form(
-                key: _userLoginFormKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _userEmailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'your@email.com',
-                        prefixIcon: Icon(Icons.email_outlined, color: Colors.blue.shade700),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                          return 'Please enter a valid email';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _userPasswordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        hintText: '••••••••',
-                        prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade700),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // Implement forgot password
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _userLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade700,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          elevation: 5,
-                        ),
-                        child: _isLoading
-                            ? SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    // Demo credentials
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.blue.shade200),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
-                              SizedBox(width: 5),
-                              Text(
-                                'Demo Customer Account',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Email: user1@example.com\nPassword: user123',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue.shade600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildLoginForm(),
               
               // Register Tab
-              Form(
-                key: _userRegFormKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _regNameController,
-                        decoration: InputDecoration(
-                          labelText: 'Full Name',
-                          hintText: 'John Doe',
-                          prefixIcon: Icon(Icons.person_outline, color: Colors.blue.shade700),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _regEmailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'your@email.com',
-                          prefixIcon: Icon(Icons.email_outlined, color: Colors.blue.shade700),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _regPasswordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          hintText: '••••••••',
-                          prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade700),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _regConfirmPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintText: '••••••••',
-                          prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade700),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
-                              });
-                            },
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != _regPasswordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _userRegister,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade700,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            elevation: 5,
-                          ),
-                          child: _isLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  'Create Account',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildRegisterForm(),
             ],
           ),
         ),
@@ -803,53 +533,20 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
     );
   }
 
-  Widget _buildAdminForm() {
+  Widget _buildLoginForm() {
     return Form(
-      key: _adminFormKey,
+      key: _userLoginFormKey,
       child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.admin_panel_settings, color: Colors.purple.shade700),
-                SizedBox(width: 10),
-                Text(
-                  'Admin Login',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple.shade700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            controller: _adminEmailController,
+          _buildTextField(
+            controller: _userEmailController,
+            label: 'Email',
+            hint: 'your@email.com',
+            icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-              labelText: 'Admin Email',
-              hintText: 'admin@apptechvibe.com',
-              prefixIcon: Icon(Icons.email_outlined, color: Colors.purple.shade700),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.purple.shade700, width: 2),
-              ),
-              filled: true,
-              fillColor: Colors.grey.shade50,
-            ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter admin email';
+                return 'Please enter your email';
               }
               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                 return 'Please enter a valid email';
@@ -858,13 +555,105 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
             },
           ),
           SizedBox(height: 20),
-          TextFormField(
-            controller: _adminPasswordController,
+          _buildTextField(
+            controller: _userPasswordController,
+            label: 'Password',
+            hint: '••••••••',
+            icon: Icons.lock_outline,
             obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              hintText: '••••••••',
-              prefixIcon: Icon(Icons.lock_outline, color: Colors.purple.shade700),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                // Implement forgot password
+              },
+              child: Text(
+                'Forgot Password?',
+                style: TextStyle(
+                  color: Colors.blue.shade600,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          _buildGradientButton(
+            text: 'Login',
+            colors: [Colors.blue.shade600, Colors.blue.shade400],
+            onPressed: _isLoading ? null : _userLogin,
+          ),
+          SizedBox(height: 20),
+          _buildDemoCredentials(
+            'Demo Customer Account',
+            'Email: user1@example.com\nPassword: user123',
+            Colors.blue,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRegisterForm() {
+    return Form(
+      key: _userRegFormKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildTextField(
+              controller: _regNameController,
+              label: 'Full Name',
+              hint: 'John Doe',
+              icon: Icons.person_outline,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16),
+            _buildTextField(
+              controller: _regEmailController,
+              label: 'Email',
+              hint: 'your@email.com',
+              icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  return 'Please enter a valid email';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16),
+            _buildTextField(
+              controller: _regPasswordController,
+              label: 'Password',
+              hint: '••••••••',
+              icon: Icons.lock_outline,
+              obscureText: _obscurePassword,
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -876,15 +665,121 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
                   });
                 },
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16),
+            _buildTextField(
+              controller: _regConfirmPasswordController,
+              label: 'Confirm Password',
+              hint: '••••••••',
+              icon: Icons.lock_outline,
+              obscureText: _obscureConfirmPassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                  });
+                },
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.purple.shade700, width: 2),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please confirm your password';
+                }
+                if (value != _regPasswordController.text) {
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 24),
+            _buildGradientButton(
+              text: 'Create Account',
+              colors: [Colors.blue.shade600, Colors.blue.shade400],
+              onPressed: _isLoading ? null : _userRegister,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdminForm() {
+    return Form(
+      key: _adminFormKey,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purple.shade50, Colors.purple.shade100],
               ),
-              filled: true,
-              fillColor: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.purple.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.admin_panel_settings, color: Colors.purple.shade700, size: 24),
+                SizedBox(width: 12),
+                Text(
+                  'Admin Access',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          _buildTextField(
+            controller: _adminEmailController,
+            label: 'Admin Email',
+            hint: 'admin@apptechvibe.com',
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            color: Colors.purple,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter admin email';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: 20),
+          _buildTextField(
+            controller: _adminPasswordController,
+            label: 'Password',
+            hint: '••••••••',
+            icon: Icons.lock_outline,
+            color: Colors.purple,
+            obscureText: _obscurePassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -897,73 +792,160 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> with TickerProvider
             },
           ),
           SizedBox(height: 30),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _adminLogin,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.shade700,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 5,
-              ),
-              child: _isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      'Login as Admin',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
+          _buildGradientButton(
+            text: 'Login as Admin',
+            colors: [Colors.purple.shade600, Colors.purple.shade400],
+            onPressed: _isLoading ? null : _adminLogin,
           ),
           SizedBox(height: 20),
-          // Demo credentials
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.purple.shade200),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.info_outline, size: 16, color: Colors.purple.shade700),
-                    SizedBox(width: 5),
-                    Text(
-                      'Admin Credentials',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple.shade700,
-                      ),
-                    ),
-                  ],
+          _buildDemoCredentials(
+            'Admin Credentials',
+            'Email: admin@apptechvibe.com\nPassword: admin123',
+            Colors.purple,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+    Color color = Colors.blue,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(
+          icon,
+          color: color is MaterialColor ? color.shade700 : color,
+        ),
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: color is MaterialColor ? color.shade700 : color,
+            width: 2,
+          ),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      validator: validator,
+    );
+  }
+
+  Widget _buildGradientButton({
+    required String text,
+    required List<Color> colors,
+    VoidCallback? onPressed,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: colors.first.withOpacity(0.4),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        child: _isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
                 ),
-                SizedBox(height: 5),
-                Text(
-                  'Email: admin@apptechvibe.com\nPassword: admin123',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.purple.shade600,
-                  ),
-                  textAlign: TextAlign.center,
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-              ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildDemoCredentials(String title, String credentials, Color color) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: (color is MaterialColor)
+              ? [color.shade50, color.shade100]
+              : [color.withOpacity(0.1), color.withOpacity(0.2)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: (color is MaterialColor) ? color.shade200 : color.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 16,
+                color: (color is MaterialColor) ? color.shade700 : color,
+              ),
+              SizedBox(width: 5),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: (color is MaterialColor) ? color.shade700 : color,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          Text(
+            credentials,
+            style: TextStyle(
+              fontSize: 11,
+            color: (color is MaterialColor) ? color.shade700 : color,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

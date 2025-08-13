@@ -3,7 +3,7 @@ name: Deploy Flutter Web to Firebase Hosting
 on:
   push:
     branches:
-      - main  # Change to your default branch if not "main"
+      - main  # Change if your default branch is different
 
 jobs:
   build-and-deploy:
@@ -16,19 +16,23 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.22.2'  # match your local Flutter version
+        flutter-version: '3.22.2'
         channel: stable
 
     - name: Install dependencies
       run: flutter pub get
 
     - name: Build Flutter Web
-      run: flutter build web
+      run: flutter build web --release
+
+    # Optional: verify firebase.json exists and points to build/web
+    - name: Show firebase.json
+      run: cat firebase.json
 
     - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
       with:
         repoToken: ${{ secrets.GITHUB_TOKEN }}
         firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        channelId: live  # or change to "preview" for preview channel
+        channelId: live
         projectId: itsolution-93657

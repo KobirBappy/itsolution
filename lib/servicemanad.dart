@@ -100,6 +100,7 @@ class _ServicesManagementPageState extends State<ServicesManagementPage>
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 2,
         leading: IconButton(
@@ -1325,6 +1326,7 @@ class _EditServiceFormState extends State<EditServiceForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('Edit Service'),
         backgroundColor: Colors.white,
         elevation: 1,

@@ -131,6 +131,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> with SingleTicker
     if (_orderData == null) {
       return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text('Order Tracking'),
         ),
         body: Center(
@@ -163,6 +164,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> with SingleTicker
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(

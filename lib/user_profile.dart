@@ -303,6 +303,7 @@ class _UserProfilePageState extends State<UserProfilePage> with SingleTickerProv
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(

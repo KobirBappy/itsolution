@@ -315,158 +315,10 @@ class _EnhancedAdminDashboardState extends State<EnhancedAdminDashboard>
     final bool showDrawer = isMobile(context);
     
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-      //   elevation: 2,
-      //   automaticallyImplyLeading: showDrawer,
-      //   title: Row(
-      //     children: [
-      //       if (!showDrawer) ...[
-      //         Icon(FontAwesomeIcons.code, color: Colors.blue.shade700, size: 24),
-      //         SizedBox(width: 10),
-      //       ],
-      //       Text(
-      //         'Admin Dashboard',
-      //         style: TextStyle(
-      //           color: Colors.grey.shade800,
-      //           fontWeight: FontWeight.bold,
-      //           fontSize: isMobile(context) ? 18 : 22,
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      //   actions: [
-      //     // Refresh Button
-      //     IconButton(
-      //       icon: Icon(Icons.refresh, color: Colors.grey.shade700),
-      //       onPressed: _loadDashboardData,
-      //       tooltip: 'Refresh Data',
-      //     ),
-      //     // Notifications
-      //     Stack(
-      //       children: [
-      //         IconButton(
-      //           icon: Icon(Icons.notifications_outlined, color: Colors.grey.shade700),
-      //           onPressed: () => _showNotifications(),
-      //         ),
-      //         if (unreadMessages > 0)
-      //           Positioned(
-      //             right: 8,
-      //             top: 8,
-      //             child: Container(
-      //               padding: EdgeInsets.all(4),
-      //               decoration: BoxDecoration(
-      //                 color: Colors.red,
-      //                 shape: BoxShape.circle,
-      //               ),
-      //               child: Text(
-      //                 unreadMessages > 99 ? '99+' : unreadMessages.toString(),
-      //                 style: TextStyle(
-      //                   color: Colors.white,
-      //                   fontSize: 10,
-      //                   fontWeight: FontWeight.bold,
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //       ],
-      //     ),
-      //     // Messages
-      //     Stack(
-      //       children: [
-      //         IconButton(
-      //           icon: Icon(Icons.chat_outlined, color: Colors.grey.shade700),
-      //           onPressed: () => _showSupportChats(),
-      //         ),
-      //         if (unreadMessages > 0)
-      //           Positioned(
-      //             right: 8,
-      //             top: 8,
-      //             child: Container(
-      //               width: 8,
-      //               height: 8,
-      //               decoration: BoxDecoration(
-      //                 color: Colors.red,
-      //                 shape: BoxShape.circle,
-      //               ),
-      //             ),
-      //           ),
-      //       ],
-      //     ),
-      //     // User Profile
-      //     Padding(
-      //       padding: EdgeInsets.symmetric(horizontal: 8),
-      //       child: Row(
-      //         children: [
-      //           Container(
-      //             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      //             decoration: BoxDecoration(
-      //               color: Colors.blue.shade50,
-      //               borderRadius: BorderRadius.circular(20),
-      //             ),
-      //             child: Row(
-      //               children: [
-      //                 CircleAvatar(
-      //                   radius: 15,
-      //                   backgroundColor: Colors.blue.shade700,
-      //                   child: Icon(Icons.person, color: Colors.white, size: 18),
-      //                 ),
-      //                 SizedBox(width: 8),
-      //                 if (!isMobile(context))
-      //                   Text(
-      //                     _auth.currentUser?.email?.split('@')[0] ?? 'Admin',
-      //                     style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-      //                   ),
-      //               ],
-      //             ),
-      //           ),
-      //           PopupMenuButton(
-      //             icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade700),
-      //             itemBuilder: (context) => [
-      //               PopupMenuItem(
-      //                 child: Row(
-      //                   children: [
-      //                     Icon(Icons.person, size: 20),
-      //                     SizedBox(width: 12),
-      //                     Text('Profile'),
-      //                   ],
-      //                 ),
-      //                 value: 'profile',
-      //               ),
-      //               PopupMenuItem(
-      //                 child: Row(
-      //                   children: [
-      //                     Icon(Icons.settings, size: 20),
-      //                     SizedBox(width: 12),
-      //                     Text('Settings'),
-      //                   ],
-      //                 ),
-      //                 value: 'settings',
-      //               ),
-      //               PopupMenuItem(
-      //                 child: Row(
-      //                   children: [
-      //                     Icon(Icons.logout, size: 20, color: Colors.red),
-      //                     SizedBox(width: 12),
-      //                     Text('Logout', style: TextStyle(color: Colors.red)),
-      //                   ],
-      //                 ),
-      //                 value: 'logout',
-      //               ),
-      //             ],
-      //             onSelected: (value) {
-      //               if (value == 'logout') {
-      //                 _signOut();
-      //               }
-      //             },
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //   ],
-      // ),
+      
 
        appBar: CommonAppBar(
+        
         type: AppBarType.admin,
         additionalData: {
           // Pass your refresh function
@@ -537,6 +389,9 @@ class _EnhancedAdminDashboardState extends State<EnhancedAdminDashboard>
       ),
     );
   }
+  Widget _buildHeroOffersContent() {
+  return HeroOffersManagementPage();
+}
 
   Widget _buildMobileDrawer() {
     return Drawer(
@@ -639,17 +494,18 @@ class _EnhancedAdminDashboardState extends State<EnhancedAdminDashboard>
 
   List<Widget> _buildNavigationItems() {
     final items = [
-      {'icon': Icons.dashboard, 'title': 'Dashboard', 'index': 0, 'badge': null},
-      {'icon': Icons.shopping_cart, 'title': 'Orders', 'index': 1, 'badge': pendingOrders > 0 ? pendingOrders : null},
-      {'icon': Icons.design_services, 'title': 'Services', 'index': 2, 'badge': null},
-      {'icon': Icons.people, 'title': 'Customers', 'index': 3, 'badge': null},
-      {'icon': Icons.chat, 'title': 'Support Chat', 'index': 4, 'badge': unreadMessages > 0 ? unreadMessages : null},
-      {'icon': Icons.payment, 'title': 'Payments', 'index': 5, 'badge': null},
-      {'icon': Icons.analytics, 'title': 'Analytics', 'index': 6, 'badge': null},
-      {'icon': Icons.inventory, 'title': 'Products', 'index': 7, 'badge': null},
-      {'icon': Icons.notifications, 'title': 'Notifications', 'index': 8, 'badge': null},
-      {'icon': Icons.settings, 'title': 'Settings', 'index': 9, 'badge': null},
-    ];
+    {'icon': Icons.dashboard, 'title': 'Dashboard', 'index': 0, 'badge': null},
+    {'icon': Icons.shopping_cart, 'title': 'Orders', 'index': 1, 'badge': pendingOrders > 0 ? pendingOrders : null},
+    {'icon': Icons.design_services, 'title': 'Services', 'index': 2, 'badge': null},
+    {'icon': Icons.people, 'title': 'Customers', 'index': 3, 'badge': null},
+    {'icon': Icons.chat, 'title': 'Support Chat', 'index': 4, 'badge': unreadMessages > 0 ? unreadMessages : null},
+    {'icon': Icons.payment, 'title': 'Payments', 'index': 5, 'badge': null},
+    {'icon': Icons.analytics, 'title': 'Analytics', 'index': 6, 'badge': null},
+    {'icon': Icons.inventory, 'title': 'Products', 'index': 7, 'badge': null},
+    {'icon': Icons.view_carousel, 'title': 'Hero Offers', 'index': 8, 'badge': null}, // NEW ITEM
+    {'icon': Icons.notifications, 'title': 'Notifications', 'index': 9, 'badge': null},
+    {'icon': Icons.settings, 'title': 'Settings', 'index': 10, 'badge': null},
+  ];
 
     return items.map((item) {
       final isSelected = _selectedIndex == item['index'];
@@ -710,32 +566,34 @@ class _EnhancedAdminDashboardState extends State<EnhancedAdminDashboard>
     }).toList();
   }
 
-  Widget _buildContent() {
-    switch (_selectedIndex) {
-      case 0:
-        return _buildDashboardContent();
-      case 1:
-        return _buildOrdersContent();
-      case 2:
-        return _buildServicesContent();
-      case 3:
-        return _buildCustomersContent();
-      case 4:
-        return _buildSupportChatContent();
-      case 5:
-        return _buildPaymentsContent();
-      case 6:
-        return _buildAnalyticsContent();
-      case 7:
-        return _buildProductsContent();
-      case 8:
-        return _buildNotificationsContent();
-      case 9:
-        return _buildSettingsContent();
-      default:
-        return _buildDashboardContent();
-    }
+ Widget _buildContent() {
+  switch (_selectedIndex) {
+    case 0:
+      return _buildDashboardContent();
+    case 1:
+      return _buildOrdersContent();
+    case 2:
+      return _buildServicesContent();
+    case 3:
+      return _buildCustomersContent();
+    case 4:
+      return _buildSupportChatContent();
+    case 5:
+      return _buildPaymentsContent();
+    case 6:
+      return _buildAnalyticsContent();
+    case 7:
+      return _buildProductsContent();
+    case 8:
+      return _buildHeroOffersContent(); // NEW CASE
+    case 9:
+      return _buildNotificationsContent();
+    case 10:
+      return _buildSettingsContent();
+    default:
+      return _buildDashboardContent();
   }
+}
 
   Widget _buildDashboardContent() {
     return SingleChildScrollView(
@@ -2233,7 +2091,1362 @@ class _EnhancedAdminDashboardState extends State<EnhancedAdminDashboard>
   }
 }
 
+// Add this new class after your existing classes
+class HeroOffersManagementPage extends StatefulWidget {
+  @override
+  _HeroOffersManagementPageState createState() => _HeroOffersManagementPageState();
+}
 
+class _HeroOffersManagementPageState extends State<HeroOffersManagementPage> 
+    with SingleTickerProviderStateMixin {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late TabController _tabController;
+  
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  bool isMobile(BuildContext context) => MediaQuery.of(context).size.width < 768;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(20),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Icon(Icons.view_carousel, color: Colors.blue.shade700, size: 28),
+                SizedBox(width: 12),
+                Text(
+                  'Hero Offers Management',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // TabBar
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: Colors.blue.shade700,
+              labelColor: Colors.blue.shade700,
+              unselectedLabelColor: Colors.grey.shade600,
+              tabs: [
+                Tab(
+                  icon: Icon(Icons.list),
+                  text: 'Manage Offers',
+                ),
+                Tab(
+                  icon: Icon(Icons.add_box),
+                  text: 'Add New Offer',
+                ),
+              ],
+            ),
+          ),
+          
+          // TabBarView
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildHeroOffersList(),
+                _buildAddHeroOfferForm(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroOffersList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('hero_offers')
+          .orderBy('priority')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 60, color: Colors.red),
+                SizedBox(height: 16),
+                Text('Error loading hero offers'),
+                SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => setState(() {}),
+                  child: Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        
+        final offers = snapshot.data!.docs;
+        
+        if (offers.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.view_carousel_outlined,
+                  size: 80,
+                  color: Colors.grey.shade300,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'No hero offers found',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => _tabController.animateTo(1),
+                  child: Text('Create First Offer'),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        return ListView.builder(
+          padding: EdgeInsets.all(16),
+          itemCount: offers.length,
+          itemBuilder: (context, index) {
+            final offer = offers[index];
+            final data = offer.data() as Map<String, dynamic>;
+            return _buildHeroOfferCard(offer.id, data);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildHeroOfferCard(String offerId, Map<String, dynamic> data) {
+    final isActive = data['isActive'] ?? true;
+    final priority = data['priority'] ?? 0;
+    
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isActive ? Colors.green.shade200 : Colors.red.shade200,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Priority: $priority',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isActive ? Colors.green.shade50 : Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    isActive ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isActive ? Colors.green.shade700 : Colors.red.shade700,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        _showEditOfferDialog(offerId, data);
+                        break;
+                      case 'toggle':
+                        _toggleOfferStatus(offerId, isActive);
+                        break;
+                      case 'delete':
+                        _showDeleteConfirmDialog(offerId, data['title']);
+                        break;
+                      case 'preview':
+                        _showOfferPreview(data);
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'preview',
+                      child: Row(
+                        children: [
+                          Icon(Icons.visibility, size: 20),
+                          SizedBox(width: 8),
+                          Text('Preview'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 20),
+                          SizedBox(width: 8),
+                          Text('Edit'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'toggle',
+                      child: Row(
+                        children: [
+                          Icon(
+                            isActive ? Icons.visibility_off : Icons.visibility,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Text(isActive ? 'Deactivate' : 'Activate'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 20, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            
+            // Content Preview
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: _getGradientColors(data['gradientType'] ?? 'orange'),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: _getIconGradientColors(data['iconGradient'] ?? 'orange_red'),
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _getIconData(data['iconType'] ?? 'fire'),
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['title'] ?? 'No Title',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          data['subtitle'] ?? 'No Subtitle',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            SizedBox(height: 12),
+            
+            // Metadata
+            Row(
+              children: [
+                Icon(Icons.category, size: 16, color: Colors.grey.shade600),
+                SizedBox(width: 4),
+                Text(
+                  'Type: ${data['gradientType'] ?? 'orange'}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                SizedBox(width: 16),
+                Icon(Icons.touch_app, size: 16, color: Colors.grey.shade600),
+                SizedBox(width: 4),
+                Text(
+                  'Action: ${data['actionType'] ?? 'none'}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                if (data['hasAction'] == true) ...[
+                  SizedBox(width: 16),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      data['actionText'] ?? '',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddHeroOfferForm() {
+    return AddHeroOfferForm();
+  }
+
+  // Helper methods (same as in your product catalog)
+  LinearGradient _getGradientColors(String gradientType) {
+    switch (gradientType) {
+      case 'blue':
+        return LinearGradient(
+          colors: [
+            Colors.blue.shade400.withOpacity(0.1),
+            Colors.indigo.shade400.withOpacity(0.1),
+          ],
+        );
+      case 'green':
+        return LinearGradient(
+          colors: [
+            Colors.green.shade400.withOpacity(0.1),
+            Colors.teal.shade400.withOpacity(0.1),
+          ],
+        );
+      case 'purple':
+        return LinearGradient(
+          colors: [
+            Colors.purple.shade400.withOpacity(0.1),
+            Colors.pink.shade400.withOpacity(0.1),
+          ],
+        );
+      case 'orange':
+      default:
+        return LinearGradient(
+          colors: [
+            Colors.orange.shade400.withOpacity(0.1),
+            Colors.red.shade400.withOpacity(0.1),
+          ],
+        );
+    }
+  }
+
+  IconData _getIconData(String iconType) {
+    switch (iconType) {
+      case 'star':
+        return Icons.star;
+      case 'flash':
+        return Icons.flash_on;
+      case 'gift':
+        return Icons.card_giftcard;
+      case 'sale':
+        return Icons.local_offer;
+      case 'percent':
+        return Icons.percent;
+      case 'fire':
+      default:
+        return Icons.local_fire_department;
+    }
+  }
+
+  List<Color> _getIconGradientColors(String gradientType) {
+    switch (gradientType) {
+      case 'blue_purple':
+        return [Colors.blue, Colors.purple];
+      case 'green_teal':
+        return [Colors.green, Colors.teal];
+      case 'purple_pink':
+        return [Colors.purple, Colors.pink];
+      case 'orange_red':
+      default:
+        return [Colors.orange, Colors.red];
+    }
+  }
+
+  Future<void> _toggleOfferStatus(String offerId, bool isActive) async {
+    try {
+      await _firestore.collection('hero_offers').doc(offerId).update({
+        'isActive': !isActive,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Offer status updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating offer status: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteOffer(String offerId) async {
+    try {
+      await _firestore.collection('hero_offers').doc(offerId).delete();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Offer deleted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting offer: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showEditOfferDialog(String offerId, Map<String, dynamic> data) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: isMobile(context) ? double.infinity : 600,
+          height: 600,
+          child: EditHeroOfferForm(
+            offerId: offerId,
+            offerData: data,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmDialog(String offerId, String title) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Hero Offer'),
+        content: Text('Are you sure you want to delete "$title"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteOffer(offerId);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOfferPreview(Map<String, dynamic> data) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: 400,
+          height: 200,
+          child: Container(
+            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _getGradientColors(data['gradientType'] ?? 'orange').colors,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: _getIconGradientColors(data['iconGradient'] ?? 'orange_red'),
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getIconData(data['iconType'] ?? 'fire'),
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        data['title'] ?? 'No Title',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                Text(
+                  data['subtitle'] ?? 'No Subtitle',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (data['hasAction'] == true && data['actionText'] != null)
+                  Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.orange,
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        data['actionText'],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Add Hero Offer Form
+class AddHeroOfferForm extends StatefulWidget {
+  @override
+  _AddHeroOfferFormState createState() => _AddHeroOfferFormState();
+}
+
+class _AddHeroOfferFormState extends State<AddHeroOfferForm> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _formKey = GlobalKey<FormState>();
+  
+  final _titleController = TextEditingController();
+  final _subtitleController = TextEditingController();
+  final _priorityController = TextEditingController(text: '1');
+  final _actionTextController = TextEditingController();
+  final _actionValueController = TextEditingController();
+  final _validUntilController = TextEditingController();
+  
+  String _gradientType = 'orange';
+  String _iconType = 'fire';
+  String _iconGradient = 'orange_red';
+  String _textGradient = 'orange_red';
+  String _actionType = 'none';
+  bool _hasAction = false;
+  bool _isActive = true;
+  
+  bool _isLoading = false;
+
+  final List<Map<String, String>> gradientOptions = [
+    {'value': 'orange', 'label': 'Orange/Red'},
+    {'value': 'blue', 'label': 'Blue/Purple'},
+    {'value': 'green', 'label': 'Green/Teal'},
+    {'value': 'purple', 'label': 'Purple/Pink'},
+  ];
+
+  final List<Map<String, String>> iconOptions = [
+    {'value': 'fire', 'label': 'Fire'},
+    {'value': 'star', 'label': 'Star'},
+    {'value': 'flash', 'label': 'Flash'},
+    {'value': 'gift', 'label': 'Gift'},
+    {'value': 'sale', 'label': 'Sale'},
+    {'value': 'percent', 'label': 'Percent'},
+  ];
+
+  final List<Map<String, String>> actionOptions = [
+    {'value': 'none', 'label': 'No Action'},
+    {'value': 'category', 'label': 'Navigate to Category'},
+    {'value': 'cart', 'label': 'Open Cart'},
+    {'value': 'url', 'label': 'Open URL'},
+    {'value': 'product', 'label': 'Show Product'},
+  ];
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _subtitleController.dispose();
+    _priorityController.dispose();
+    _actionTextController.dispose();
+    _actionValueController.dispose();
+    _validUntilController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addHeroOffer() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final offerData = {
+        'title': _titleController.text.trim(),
+        'subtitle': _subtitleController.text.trim(),
+        'priority': int.parse(_priorityController.text),
+        'gradientType': _gradientType,
+        'iconType': _iconType,
+        'iconGradient': _iconGradient,
+        'textGradient': _textGradient,
+        'hasAction': _hasAction,
+        'actionText': _hasAction ? _actionTextController.text.trim() : '',
+        'actionType': _actionType,
+        'actionValue': _hasAction ? _actionValueController.text.trim() : '',
+        'isActive': _isActive,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'validUntil': _validUntilController.text.isNotEmpty 
+            ? Timestamp.fromDate(DateTime.parse(_validUntilController.text))
+            : null,
+      };
+      
+      await _firestore.collection('hero_offers').add(offerData);
+      
+      // Clear form
+      _clearForm();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Hero offer added successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error adding hero offer: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _clearForm() {
+    _titleController.clear();
+    _subtitleController.clear();
+    _priorityController.text = '1';
+    _actionTextController.clear();
+    _actionValueController.clear();
+    _validUntilController.clear();
+    setState(() {
+      _gradientType = 'orange';
+      _iconType = 'fire';
+      _iconGradient = 'orange_red';
+      _textGradient = 'orange_red';
+      _actionType = 'none';
+      _hasAction = false;
+      _isActive = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(20),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Add New Hero Offer',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            SizedBox(height: 20),
+            
+            // Basic Information
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Basic Information',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Title *',
+                        border: OutlineInputBorder(),
+                        helperText: 'Main heading text',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter title';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    
+                    TextFormField(
+                      controller: _subtitleController,
+                      decoration: InputDecoration(
+                        labelText: 'Subtitle *',
+                        border: OutlineInputBorder(),
+                        helperText: 'Description text',
+                      ),
+                      maxLines: 2,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter subtitle';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    
+                    TextFormField(
+                      controller: _priorityController,
+                      decoration: InputDecoration(
+                        labelText: 'Priority *',
+                        border: OutlineInputBorder(),
+                        helperText: 'Lower number = higher priority',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter priority';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            
+            // Visual Design
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Visual Design',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    DropdownButtonFormField<String>(
+                      value: _gradientType,
+                      decoration: InputDecoration(
+                        labelText: 'Background Gradient',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: gradientOptions.map((option) {
+                        return DropdownMenuItem(
+                          value: option['value'],
+                          child: Text(option['label']!),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _gradientType = value!;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    
+                    DropdownButtonFormField<String>(
+                      value: _iconType,
+                      decoration: InputDecoration(
+                        labelText: 'Icon Type',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: iconOptions.map((option) {
+                        return DropdownMenuItem(
+                          value: option['value'],
+                          child: Text(option['label']!),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _iconType = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            
+            // Action Settings
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Action Settings',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    SwitchListTile(
+                      title: Text('Has Action Button'),
+                      subtitle: Text('Add clickable button to the offer'),
+                      value: _hasAction,
+                      onChanged: (value) {
+                        setState(() {
+                          _hasAction = value;
+                          if (!value) {
+                            _actionType = 'none';
+                          }
+                        });
+                      },
+                    ),
+                    
+                    if (_hasAction) ...[
+                      SizedBox(height: 16),
+                      TextFormField(
+                        controller: _actionTextController,
+                        decoration: InputDecoration(
+                          labelText: 'Button Text',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: _hasAction ? (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter button text';
+                          }
+                          return null;
+                        } : null,
+                      ),
+                      SizedBox(height: 16),
+                      
+                      DropdownButtonFormField<String>(
+                        value: _actionType,
+                        decoration: InputDecoration(
+                          labelText: 'Action Type',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: actionOptions.map((option) {
+                          return DropdownMenuItem(
+                            value: option['value'],
+                            child: Text(option['label']!),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _actionType = value!;
+                          });
+                        },
+                      ),
+                      
+                      if (_actionType != 'none' && _actionType != 'cart') ...[
+                        SizedBox(height: 16),
+                        TextFormField(
+                          controller: _actionValueController,
+                          decoration: InputDecoration(
+                            labelText: _getActionValueLabel(),
+                            border: OutlineInputBorder(),
+                            helperText: _getActionValueHelper(),
+                          ),
+                          validator: (_actionType != 'none' && _actionType != 'cart') ? (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter ${_getActionValueLabel().toLowerCase()}';
+                            }
+                            return null;
+                          } : null,
+                        ),
+                      ],
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            
+            // Additional Settings
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Additional Settings',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    TextFormField(
+                      controller: _validUntilController,
+                      decoration: InputDecoration(
+                        labelText: 'Valid Until (Optional)',
+                        border: OutlineInputBorder(),
+                        helperText: 'Format: YYYY-MM-DD (e.g., 2024-12-31)',
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.calendar_today),
+                          onPressed: _selectDate,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    SwitchListTile(
+                      title: Text('Active'),
+                      subtitle: Text('Offer will be visible to users'),
+                      value: _isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          _isActive = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
+            
+            // Submit Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : _clearForm,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text('Clear Form'),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _addHeroOffer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade700,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isLoading
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Text('Adding...'),
+                            ],
+                          )
+                        : Text('Add Hero Offer'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getActionValueLabel() {
+    switch (_actionType) {
+      case 'category':
+        return 'Category Name';
+      case 'url':
+        return 'URL';
+      case 'product':
+        return 'Product ID';
+      default:
+        return 'Action Value';
+    }
+  }
+
+  String _getActionValueHelper() {
+    switch (_actionType) {
+      case 'category':
+        return 'e.g., Mobile Development, Web Development';
+      case 'url':
+        return 'e.g., https://example.com';
+      case 'product':
+        return 'Product document ID from Firestore';
+      default:
+        return '';
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
+    
+    if (date != null) {
+      _validUntilController.text = date.toString().split(' ')[0];
+    }
+  }
+}
+
+// Edit Hero Offer Form (simplified version of add form)
+class EditHeroOfferForm extends StatefulWidget {
+  final String offerId;
+  final Map<String, dynamic> offerData;
+
+  const EditHeroOfferForm({
+    Key? key,
+    required this.offerId,
+    required this.offerData,
+  }) : super(key: key);
+
+  @override
+  _EditHeroOfferFormState createState() => _EditHeroOfferFormState();
+}
+
+class _EditHeroOfferFormState extends State<EditHeroOfferForm> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _formKey = GlobalKey<FormState>();
+  
+  late TextEditingController _titleController;
+  late TextEditingController _subtitleController;
+  late TextEditingController _priorityController;
+  late TextEditingController _actionTextController;
+  late TextEditingController _actionValueController;
+  
+  late String _gradientType;
+  late String _iconType;
+  late String _actionType;
+  late bool _hasAction;
+  late bool _isActive;
+  
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    _titleController = TextEditingController(text: widget.offerData['title'] ?? '');
+    _subtitleController = TextEditingController(text: widget.offerData['subtitle'] ?? '');
+    _priorityController = TextEditingController(text: widget.offerData['priority']?.toString() ?? '1');
+    _actionTextController = TextEditingController(text: widget.offerData['actionText'] ?? '');
+    _actionValueController = TextEditingController(text: widget.offerData['actionValue'] ?? '');
+    
+    _gradientType = widget.offerData['gradientType'] ?? 'orange';
+    _iconType = widget.offerData['iconType'] ?? 'fire';
+    _actionType = widget.offerData['actionType'] ?? 'none';
+    _hasAction = widget.offerData['hasAction'] ?? false;
+    _isActive = widget.offerData['isActive'] ?? true;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _subtitleController.dispose();
+    _priorityController.dispose();
+    _actionTextController.dispose();
+    _actionValueController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateHeroOffer() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final offerData = {
+        'title': _titleController.text.trim(),
+        'subtitle': _subtitleController.text.trim(),
+        'priority': int.parse(_priorityController.text),
+        'gradientType': _gradientType,
+        'iconType': _iconType,
+        'hasAction': _hasAction,
+        'actionText': _hasAction ? _actionTextController.text.trim() : '',
+        'actionType': _actionType,
+        'actionValue': _hasAction ? _actionValueController.text.trim() : '',
+        'isActive': _isActive,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      
+      await _firestore.collection('hero_offers').doc(widget.offerId).update(offerData);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Hero offer updated successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      Navigator.pop(context);
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating hero offer: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Edit Hero Offer'),
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: 'Title *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter title';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              
+              TextFormField(
+                controller: _subtitleController,
+                decoration: InputDecoration(
+                  labelText: 'Subtitle *',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter subtitle';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              
+              TextFormField(
+                controller: _priorityController,
+                decoration: InputDecoration(
+                  labelText: 'Priority *',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter priority';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter valid number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              
+              SwitchListTile(
+                title: Text('Active'),
+                value: _isActive,
+                onChanged: (value) {
+                  setState(() {
+                    _isActive = value;
+                  });
+                },
+              ),
+              SizedBox(height: 24),
+              
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _updateHeroOffer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Update Hero Offer'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 
 class ProductManagementPage extends StatefulWidget {
