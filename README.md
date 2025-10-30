@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+
+web url-
+
+https://itsolution-93657.web.app/
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
