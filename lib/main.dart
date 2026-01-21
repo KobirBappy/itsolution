@@ -10,6 +10,7 @@ import 'dart:ui';
 import 'package:itapp/customer_management.dart';
 import 'package:itapp/firebase_initializer.dart';
 import 'package:itapp/order_tracking.dart';
+import 'package:itapp/privacy_policy_page.dart';
 import 'package:itapp/product_catalog.dart';
 import 'package:itapp/servicemanad.dart';
 import 'package:itapp/shopping_cart.dart';
@@ -70,6 +71,7 @@ class MyApp extends StatelessWidget {
         '/order-management': (context) => OrderManagementPage(),
         '/product-management': (context) => ProductManagementPage(),
         '/services-management': (context) => ServicesManagementPage(),
+         '/privacy-policy': (context) => PrivacyPolicyPage(), // Add this
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/payment') {
@@ -504,7 +506,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             _buildDrawerItem(Icons.home, 'Home', '/', context),
             _buildDrawerItem(Icons.shopping_bag, 'Shop', '/products', context, isHighlighted: true),
             _buildDrawerItem(Icons.design_services, 'Services', '/services', context),
-            _buildDrawerItem(Icons.info, 'About', null, context),
+          _buildDrawerItem(Icons.info, 'Policy', '/privacy-policy', context),
             _buildDrawerItem(Icons.contact_mail, 'Contact', '/contact', context),
             Divider(),
             _buildDrawerItem(Icons.login, 'Login', null, context, isSpecial: true, isLogin: true),

@@ -18,6 +18,7 @@ enum AppBarType {
   profile,
   customerManagement,
   orderManagement,
+  other,
   servicesManagement,
 }
 
@@ -212,7 +213,7 @@ class _CommonAppBarState extends State<CommonAppBar> {
             children: [
               _buildNavButton('Shop', '/products', isHighlighted: true),
               _buildNavButton('Services', '/services'),
-              _buildNavButton('About', null),
+             _buildNavButton('Policy', '/privacy-policy'),
               _buildNavButton('Contact', '/contact'),
               SizedBox(width: 20),
               _buildAnimatedLoginButton(),
