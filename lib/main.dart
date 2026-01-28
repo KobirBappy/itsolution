@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,11 +9,15 @@ import 'package:itapp/ai-floating-chat-widget.dart';
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:itapp/customer_management.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:itapp/firebase_initializer.dart';
 import 'package:itapp/order_tracking.dart';
 import 'package:itapp/privacy_policy_page.dart';
 import 'package:itapp/product_catalog.dart';
 import 'package:itapp/servicemanad.dart';
+import 'package:itapp/shared_widgets.dart';
 import 'package:itapp/shopping_cart.dart';
 import 'package:itapp/unified_login.dart';
 import 'package:itapp/user_dashboard.dart';
@@ -27,18 +32,12 @@ import 'contactpage.dart';
 import 'paymentintregation.dart';
 import 'ordermanagementadmin.dart';
 
-
-// Import new components
-import 'floating_chat_widget.dart';
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // Initialize database with sample data
   await FirebaseInitializer.initializeDatabase();
   await FirebaseInitializer.createSampleUsers();
   
@@ -59,7 +58,6 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => EnhancedLandingPage(),
-        // Removed '/unified-login' route since we're using popup now
         '/admin': (context) => EnhancedAdminDashboard(),
         '/user-dashboard': (context) => EnhancedUserDashboard(),
         '/services': (context) => ServicesPage(),
@@ -71,7 +69,7 @@ class MyApp extends StatelessWidget {
         '/order-management': (context) => OrderManagementPage(),
         '/product-management': (context) => ProductManagementPage(),
         '/services-management': (context) => ServicesManagementPage(),
-         '/privacy-policy': (context) => PrivacyPolicyPage(), // Add this
+        '/privacy-policy': (context) => PrivacyPolicyPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/payment') {
@@ -92,181 +90,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Animated Background Widget
-class AnimatedBackground extends StatefulWidget {
-  final Widget child;
-  
-  const AnimatedBackground({Key? key, required this.child}) : super(key: key);
-  
-  @override
-  _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
-}
-
-class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProviderStateMixin {
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _animations;
-  
-  @override
-  void initState() {
-    super.initState();
-    _controllers = List.generate(
-      6,
-      (index) => AnimationController(
-        duration: Duration(seconds: 8 + index * 2),
-        vsync: this,
-      ),
-    );
-    
-    _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 0, end: 2 * math.pi).animate(controller);
-    }).toList();
-    
-    for (var controller in _controllers) {
-      controller.repeat();
-    }
-  }
-  
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Enhanced Gradient Background
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFF8FAFC),
-                Color(0xFFE2E8F0),
-                Color(0xFFF1F5F9),
-              ],
-            ),
-          ),
-        ),
-        // Floating Tech Icons
-        ...List.generate(6, (index) {
-          final icons = [
-            FontAwesomeIcons.code,
-            FontAwesomeIcons.mobile,
-            FontAwesomeIcons.server,
-            FontAwesomeIcons.shield,
-            FontAwesomeIcons.globe,
-            FontAwesomeIcons.microchip,
-          ];
-          
-          return AnimatedBuilder(
-            animation: _animations[index],
-            builder: (context, child) {
-              return Positioned(
-                left: (index * 180.0) % MediaQuery.of(context).size.width + 
-                      math.sin(_animations[index].value) * 60,
-                top: 80 + index * 120.0 + math.cos(_animations[index].value) * 40,
-                child: Opacity(
-                  opacity: 0.08,
-                  child: Transform.rotate(
-                    angle: _animations[index].value * 0.5,
-                    child: Icon(
-                      icons[index],
-                      size: 80 + (index * 15.0),
-                      color: [
-                        Colors.blue,
-                        Colors.purple,
-                        Colors.orange,
-                        Colors.teal,
-                        Colors.indigo,
-                        Colors.red
-                      ][index].withOpacity(0.4),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        }),
-        widget.child,
-      ],
-    );
-  }
-}
-
-// Enhanced Glassmorphism Card
-class GlassmorphicCard extends StatelessWidget {
-  final Widget child;
-  final double? width;
-  final double? height;
-  final EdgeInsets? padding;
-  final EdgeInsets? margin;
-  final double blur;
-  final double opacity;
-  final BorderRadius? borderRadius;
-  final List<Color>? gradientColors;
-  
-  const GlassmorphicCard({
-    Key? key,
-    required this.child,
-    this.width,
-    this.height,
-    this.padding,
-    this.margin,
-    this.blur = 15,
-    this.opacity = 0.1,
-    this.borderRadius,
-    this.gradientColors,
-  }) : super(key: key);
-  
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      margin: margin,
-      child: ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(25),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: gradientColors ?? [
-                  Colors.white.withOpacity(opacity),
-                  Colors.white.withOpacity(opacity * 0.8),
-                ],
-              ),
-              borderRadius: borderRadius ?? BorderRadius.circular(25),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  spreadRadius: 0,
-                  offset: Offset(0, 10),
-                ),
-              ],
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Enhanced Landing Page
 class EnhancedLandingPage extends StatefulWidget {
   @override
   _EnhancedLandingPageState createState() => _EnhancedLandingPageState();
@@ -275,32 +98,29 @@ class EnhancedLandingPage extends StatefulWidget {
 class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerProviderStateMixin {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late AnimationController _controller;
-  late List<AnimationController> _cardControllers;
-  late AnimationController _scrollController;
-  late AnimationController _pulseController;
   late AnimationController _marqueeController;
   late Animation<double> _marqueeAnimation;
-  late AnimationController _floatingController;
   ScrollController _pageScrollController = ScrollController();
   
   String selectedCategory = 'All';
   double _scrollOffset = 0.0;
   bool _showScrollToTop = false;
+  bool _chatAutoOpened = false;
   
-  // Marquee announcements
+  // Cached data
+  String? _cachedProfileImageUrl;
+  bool _isLoadingProfile = true;
+  
   final List<String> announcements = [
     "🔥 MEGA SALE: 75% OFF on all premium services!",
     "🚀 New AI-powered solutions now available",
     "💡 Free consultation for enterprise clients",
     "⚡ 24/7 support with 99.9% uptime guarantee",
-    "🎯 Custom solutions starting from \$99",
-    "🌟 Award-winning development team",
   ];
   
-  // Stats for animated counters
   final List<Map<String, dynamic>> stats = [
-    {'number': 500, 'suffix': '+', 'label': 'Happy Clients', 'icon': FontAwesomeIcons.users},
-    {'number': 50, 'suffix': '+', 'label': 'Projects Completed', 'icon': FontAwesomeIcons.projectDiagram},
+    {'number': 5, 'suffix': '+', 'label': 'Happy Clients', 'icon': FontAwesomeIcons.users},
+    {'number': 40, 'suffix': '+', 'label': 'Projects Completed', 'icon': FontAwesomeIcons.projectDiagram},
     {'number': 24, 'suffix': '/7', 'label': 'Support Available', 'icon': FontAwesomeIcons.headset},
     {'number': 99, 'suffix': '%', 'label': 'Client Satisfaction', 'icon': FontAwesomeIcons.star},
   ];
@@ -311,56 +131,48 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
       title: 'App Development',
       description: 'Native & Cross-platform mobile applications',
       color: Colors.blue,
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.networkWired,
       title: 'Networking Solutions',
       description: 'Enterprise network setup and management',
       color: Colors.green,
-      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.server,
       title: 'cPanel Maintenance',
       description: 'Server management and optimization',
       color: Colors.orange,
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.globe,
       title: 'Website Development',
       description: 'Responsive web design and maintenance',
       color: Colors.purple,
-      image: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.microchip,
       title: 'IoT Development',
       description: 'Smart device integration and automation',
       color: Colors.teal,
-      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.shieldAlt,
       title: 'Ethical Hacking',
       description: 'Security audits and penetration testing',
       color: Colors.red,
-      image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.shoppingCart,
       title: 'E-commerce Solutions',
       description: 'Complete online store development',
       color: Colors.indigo,
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400',
     ),
     Service(
       icon: FontAwesomeIcons.building,
       title: 'ERP Applications',
       description: 'Enterprise resource planning systems',
       color: Colors.brown,
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
     ),
   ];
 
@@ -368,23 +180,12 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: Duration(milliseconds: 1500),
       vsync: this,
     );
     
-    _scrollController = AnimationController(
-      duration: Duration(milliseconds: 500),
-      vsync: this,
-    );
-    
-    _pulseController = AnimationController(
-      duration: Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-    
-    // Marquee animation
     _marqueeController = AnimationController(
-      duration: Duration(seconds: 25),
+      duration: Duration(seconds: 20),
       vsync: this,
     )..repeat();
     
@@ -396,22 +197,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
       curve: Curves.linear,
     ));
     
-    // Floating animation
-    _floatingController = AnimationController(
-      duration: Duration(seconds: 4),
-      vsync: this,
-    )..repeat(reverse: true);
-    
-    _cardControllers = List.generate(
-      services.length,
-      (index) => AnimationController(
-        duration: Duration(milliseconds: 600),
-        vsync: this,
-      ),
-    );
-    
     _controller.forward();
-    _animateCards();
     
     _pageScrollController.addListener(() {
       setState(() {
@@ -419,13 +205,37 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
         _showScrollToTop = _scrollOffset > 300;
       });
     });
+    
+    // Load profile image
+    _loadProfileImage();
+    
+    // Auto-open chat after 3 seconds
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted && !_chatAutoOpened) {
+        setState(() {
+          _chatAutoOpened = true;
+        });
+      }
+    });
   }
 
-  void _animateCards() async {
-    for (int i = 0; i < _cardControllers.length; i++) {
-      await Future.delayed(Duration(milliseconds: 100));
+  Future<void> _loadProfileImage() async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child('profile/pp.png');
+      final url = await storageRef.getDownloadURL();
       if (mounted) {
-        _cardControllers[i].forward();
+        setState(() {
+          _cachedProfileImageUrl = url;
+          _isLoadingProfile = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading profile image: $e');
+      if (mounted) {
+        setState(() {
+          _cachedProfileImageUrl = 'https://firebasestorage.googleapis.com/v0/b/itsolution-93657.firebasestorage.app/o/profile%2Fpp.png?alt=media&token=c5df34cc-7634-4920-80f1-0d58173badd1';
+          _isLoadingProfile = false;
+        });
       }
     }
   }
@@ -433,18 +243,11 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
   @override
   void dispose() {
     _controller.dispose();
-    _scrollController.dispose();
-    _pulseController.dispose();
     _marqueeController.dispose();
-    _floatingController.dispose();
     _pageScrollController.dispose();
-    for (var controller in _cardControllers) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
-  // Responsive helper methods
   bool isMobile(BuildContext context) => MediaQuery.of(context).size.width < 600;
   bool isTablet(BuildContext context) => MediaQuery.of(context).size.width < 1200 && MediaQuery.of(context).size.width >= 600;
   bool isDesktop(BuildContext context) => MediaQuery.of(context).size.width >= 1200;
@@ -506,7 +309,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             _buildDrawerItem(Icons.home, 'Home', '/', context),
             _buildDrawerItem(Icons.shopping_bag, 'Shop', '/products', context, isHighlighted: true),
             _buildDrawerItem(Icons.design_services, 'Services', '/services', context),
-          _buildDrawerItem(Icons.info, 'Policy', '/privacy-policy', context),
+            _buildDrawerItem(Icons.info, 'Policy', '/privacy-policy', context),
             _buildDrawerItem(Icons.contact_mail, 'Contact', '/contact', context),
             Divider(),
             _buildDrawerItem(Icons.login, 'Login', null, context, isSpecial: true, isLogin: true),
@@ -538,7 +341,6 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
         onTap: () {
           Navigator.pop(context);
           if (isLogin) {
-            // Show login popup instead of navigating
             LoginPopupModal.show(context);
           } else if (route != null) {
             if (route == '/') {
@@ -569,6 +371,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                 children: [
                   _buildMarqueeBar(),
                   _buildEnhancedHeroSection(),
+                  _buildProfileSection(),
+                  _buildHireMeSection(),
                   _buildFeaturedProducts(),
                   _buildEnhancedServicesSection(),
                   _buildPaymentSection(),
@@ -579,53 +383,66 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
               ),
             ),
           ),
-          // Floating Chat Widget
-          AIFloatingChatWidget(),
-          // Scroll to Top Button
-        
+          AIFloatingChatWidget(autoOpen: _chatAutoOpened),
+        //  if (_showScrollToTop)
+            // Positioned(
+            //   right: 20,
+            //   bottom: 80,
+            //   child: FloatingActionButton(
+            //     onPressed: () {
+            //       _pageScrollController.animateTo(
+            //         0,
+            //         duration: Duration(milliseconds: 500),
+            //         curve: Curves.easeInOut,
+            //       );
+            //     },
+            //     backgroundColor: Colors.blue,
+            //     child: Icon(Icons.arrow_upward, color: Colors.white),
+            //   ),
+            // ),
         ],
       ),
     );
   }
 
   Widget _buildMarqueeBar() {
-    return Container(
-      height: 55,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFF667EEA),
-            Color(0xFF764BA2),
+    return RepaintBoundary(
+      child: Container(
+        height: 55,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF667EEA),
+              Color(0xFF764BA2),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(0.3),
+              blurRadius: 15,
+              offset: Offset(0, 5),
+            ),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withOpacity(0.4),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRect(
-        child: AnimatedBuilder(
-          animation: _marqueeAnimation,
-          builder: (context, child) {
-            return Stack(
-              children: [
-                Positioned(
-                  left: _getMarqueePosition(),
-                  child: Row(
-                    children: [
-                      // First set
-                      ...announcements.map((announcement) => _buildMarqueeItem(announcement)).toList(),
-                      // Duplicate for seamless loop
-                      ...announcements.map((announcement) => _buildMarqueeItem(announcement)).toList(),
-                    ],
+        child: ClipRect(
+          child: AnimatedBuilder(
+            animation: _marqueeAnimation,
+            builder: (context, child) {
+              return Stack(
+                children: [
+                  Positioned(
+                    left: _getMarqueePosition(),
+                    child: Row(
+                      children: [
+                        ...announcements.map((announcement) => _buildMarqueeItem(announcement)).toList(),
+                        ...announcements.map((announcement) => _buildMarqueeItem(announcement)).toList(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -636,15 +453,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
       padding: EdgeInsets.symmetric(horizontal: 80),
       child: Row(
         children: [
-          AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: 1.0 + (_pulseController.value * 0.2),
-                child: Icon(Icons.campaign, color: Colors.white, size: 22),
-              );
-            },
-          ),
+          Icon(Icons.campaign, color: Colors.white, size: 22),
           SizedBox(width: 12),
           Text(
             text,
@@ -662,7 +471,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
 
   double _getMarqueePosition() {
     final screenWidth = MediaQuery.of(context).size.width;
-    final totalWidth = announcements.length * 400.0 * 2; // Approximate width
+    final totalWidth = announcements.length * 400.0 * 2;
     return -((_marqueeAnimation.value * totalWidth) % totalWidth) + screenWidth;
   }
 
@@ -670,311 +479,940 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     final screenHeight = MediaQuery.of(context).size.height;
     final heroHeight = isMobile(context) ? screenHeight * 0.85 : screenHeight * 0.75;
     
-    return Container(
-      height: heroHeight,
-      child: Stack(
-        children: [
-          // Enhanced Background with animated orbs
-          ...List.generate(5, (index) {
-            return AnimatedBuilder(
-              animation: _floatingController,
-              builder: (context, child) {
-                return Positioned(
-                  left: (index * 220.0) + (_floatingController.value * 80),
-                  top: 120 + (index * 60.0) + (math.sin(_floatingController.value * 2 * math.pi + index) * 40),
-                  child: Container(
-                    width: 140 - (index * 25.0),
-                    height: 140 - (index * 25.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          [Colors.blue, Colors.purple, Colors.orange, Colors.teal, Colors.pink][index].withOpacity(0.15),
-                          [Colors.blue, Colors.purple, Colors.orange, Colors.teal, Colors.pink][index].withOpacity(0.05),
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: [Colors.blue, Colors.purple, Colors.orange, Colors.teal, Colors.pink][index].withOpacity(0.3),
-                          blurRadius: 40,
-                          spreadRadius: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          }),
-          
-          // Main Content
-          Center(
-            child: FadeTransition(
-              opacity: _controller,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Enhanced Offer Badge
-                    ScaleTransition(
-                      scale: CurvedAnimation(
-                        parent: _controller,
-                        curve: Curves.elasticOut,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile(context) ? 25 : 35, 
-                          vertical: isMobile(context) ? 15 : 18
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFFF6B6B),
-                              Color(0xFFFF8E53),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withOpacity(0.6),
-                              blurRadius: 30,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AnimatedBuilder(
-                              animation: _pulseController,
-                              builder: (context, child) {
-                                return Transform.scale(
-                                  scale: 1.0 + (_pulseController.value * 0.3),
-                                  child: Icon(Icons.local_fire_department, 
-                                      color: Colors.white, size: 26),
-                                );
-                              },
-                            ),
-                            SizedBox(width: 12),
-                            Text(
-                              '🔥 ULTIMATE SALE - UP TO 75% OFF!',
-                              style: TextStyle(
-                                fontSize: getResponsiveFontSize(context, 
-                                  mobile: 14, tablet: 16, desktop: 18),
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    SizedBox(height: 40),
-                    
-                    // Enhanced Animated Title
-                    Container(
-                      height: isMobile(context) ? 85 : 110,
-                      child: DefaultTextStyle(
-                        style: TextStyle(
-                          fontSize: getResponsiveFontSize(context,
-                            mobile: 34, tablet: 44, desktop: 58),
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1.5,
-                          height: 1.1,
-                        ),
-                        child: AnimatedTextKit(
-                          repeatForever: true,
-                          pause: Duration(milliseconds: 1200),
-                          animatedTexts: [
-                            TypewriterAnimatedText(
-                              'Revolutionary IT Solutions',
-                              textStyle: TextStyle(
-                                foreground: Paint()
-                                  ..shader = LinearGradient(
-                                    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                              ),
-                            ),
-                            TypewriterAnimatedText(
-                              'Future-Ready Technology',
-                              textStyle: TextStyle(
-                                foreground: Paint()
-                                  ..shader = LinearGradient(
-                                    colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
-                                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                              ),
-                            ),
-                            TypewriterAnimatedText(
-                              'Digital Transformation',
-                              textStyle: TextStyle(
-                                foreground: Paint()
-                                  ..shader = LinearGradient(
-                                    colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
-                                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    SizedBox(height: 30),
-                    
-                    // Enhanced Subtitle
-                    SlideTransition(
-                      position: Tween<Offset>(
-                        begin: Offset(0, 1),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: _controller,
-                        curve: Curves.easeOutCubic,
-                      )),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          'Elevate your business with cutting-edge technology solutions designed for tomorrow\'s challenges',
-                          style: TextStyle(
-                            fontSize: getResponsiveFontSize(context,
-                              mobile: 18, tablet: 21, desktop: 24),
-                            color: Colors.grey.shade600,
-                            height: 1.6,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                    
-                    SizedBox(height: 50),
-                    
-                    // Enhanced CTA Buttons
-                    Wrap(
-                      spacing: 25,
-                      runSpacing: 25,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        _buildEnhancedHeroButton(
-                          'Explore Products',
-                          Icons.rocket_launch,
-                          [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
-                          () => Navigator.pushNamed(context, '/products'),
-                          true,
-                        ),
-                        _buildEnhancedHeroButton(
-                          'Our Services',
-                          Icons.stars,
-                          [Color(0xFF667EEA), Color(0xFF764BA2)],
-                          () => Navigator.pushNamed(context, '/services'),
-                          false,
-                        ),
-                      ],
-                    ),
+    return RepaintBoundary(
+      child: Container(
+        height: heroHeight,
+        child: Stack(
+          children: [
+            // Simplified background - removed floating particles for performance
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.blue.withOpacity(0.05),
+                    Colors.purple.withOpacity(0.05),
                   ],
                 ),
               ),
             ),
+            
+            Center(
+              child: FadeTransition(
+                opacity: _controller,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ScaleTransition(
+                        scale: CurvedAnimation(
+                          parent: _controller,
+                          curve: Curves.elasticOut,
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile(context) ? 25 : 35, 
+                            vertical: isMobile(context) ? 15 : 18
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xFFFF6B6B),
+                                Color(0xFFFF8E53),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.orange.withOpacity(0.4),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.local_fire_department, 
+                                  color: Colors.white, size: 26),
+                              SizedBox(width: 12),
+                              Text(
+                                '🔥 ULTIMATE SALE - UP TO 75% OFF!',
+                                style: TextStyle(
+                                  fontSize: getResponsiveFontSize(context, 
+                                    mobile: 14, tablet: 16, desktop: 18),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 40),
+                      
+                      Container(
+                        height: isMobile(context) ? 85 : 110,
+                        child: DefaultTextStyle(
+                          style: TextStyle(
+                            fontSize: getResponsiveFontSize(context,
+                              mobile: 34, tablet: 44, desktop: 58),
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.5,
+                            height: 1.1,
+                          ),
+                          child: AnimatedTextKit(
+                            repeatForever: true,
+                            pause: Duration(milliseconds: 1200),
+                            animatedTexts: [
+                              TypewriterAnimatedText(
+                                'Revolutionary IT Solutions',
+                                textStyle: TextStyle(
+                                  foreground: Paint()
+                                    ..shader = LinearGradient(
+                                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                                    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                                ),
+                              ),
+                              TypewriterAnimatedText(
+                                'Future-Ready Technology',
+                                textStyle: TextStyle(
+                                  foreground: Paint()
+                                    ..shader = LinearGradient(
+                                      colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                                    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                                ),
+                              ),
+                              TypewriterAnimatedText(
+                                'Digital Transformation',
+                                textStyle: TextStyle(
+                                  foreground: Paint()
+                                    ..shader = LinearGradient(
+                                      colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+                                    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 30),
+                      
+                      SlideTransition(
+                        position: Tween<Offset>(
+                          begin: Offset(0, 1),
+                          end: Offset.zero,
+                        ).animate(CurvedAnimation(
+                          parent: _controller,
+                          curve: Curves.easeOutCubic,
+                        )),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'Elevate your business with cutting-edge technology solutions designed for tomorrow\'s challenges',
+                            style: TextStyle(
+                              fontSize: getResponsiveFontSize(context,
+                                mobile: 18, tablet: 21, desktop: 24),
+                              color: Colors.grey.shade600,
+                              height: 1.6,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 50),
+                      
+                      Wrap(
+                        spacing: 25,
+                        runSpacing: 25,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _buildEnhancedHeroButton(
+                            'Explore Products',
+                            Icons.rocket_launch,
+                            [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                            () => Navigator.pushNamed(context, '/products'),
+                            true,
+                          ),
+                          _buildEnhancedHeroButton(
+                            'Our Services',
+                            Icons.stars,
+                            [Color(0xFF667EEA), Color(0xFF764BA2)],
+                            () => Navigator.pushNamed(context, '/services'),
+                            false,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnhancedHeroButton(String text, IconData icon, List<Color> colors, VoidCallback onPressed, bool filled) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          boxShadow: [
+            BoxShadow(
+              color: colors[0].withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: filled
+            ? Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: colors),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: ElevatedButton(
+                  onPressed: onPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile(context) ? 40 : 50,
+                      vertical: isMobile(context) ? 20 : 25,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 22),
+                      SizedBox(width: 12),
+                      Text(
+                        text,
+                        style: TextStyle(
+                          fontSize: isMobile(context) ? 16 : 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : OutlinedButton(
+                onPressed: onPressed,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: colors[0], width: 2.5),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile(context) ? 40 : 50,
+                    vertical: isMobile(context) ? 20 : 25,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  backgroundColor: Colors.white.withOpacity(0.1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, color: colors[0], size: 22),
+                    SizedBox(width: 12),
+                    Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: isMobile(context) ? 16 : 18,
+                        color: colors[0],
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildProfileSection() {
+    return Container(
+      padding: getResponsivePadding(context),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF667EEA).withOpacity(0.05),
+            Color(0xFF764BA2).withOpacity(0.05),
+          ],
+        ),
+      ),
+      child: Column(
+        children: [
+          _buildSectionHeader(
+            '👨‍💼 About the Founder',
+            'Leading innovation in IT and system reliability',
+            Colors.indigo,
+          ),
+          
+          SizedBox(height: 50),
+          
+          if (_isLoadingProfile)
+            Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.indigo),
+              ),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (isMobile(context)) {
+                  return _buildMobileProfileCard();
+                } else {
+                  return _buildDesktopProfileCard();
+                }
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileProfileCard() {
+    return RepaintBoundary(
+      child: GlassmorphicCard(
+        padding: EdgeInsets.all(30),
+        gradientColors: [
+          Colors.white.withOpacity(0.95),
+          Colors.indigo.withOpacity(0.05),
+        ],
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF667EEA),
+                    Color(0xFF764BA2),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.indigo.withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.all(5),
+              child: CircleAvatar(
+                radius: 80,
+                backgroundImage: _cachedProfileImageUrl != null 
+                    ? CachedNetworkImageProvider(_cachedProfileImageUrl!)
+                    : null,
+                backgroundColor: Colors.grey.shade200,
+              ),
+            ),
+            
+            SizedBox(height: 25),
+            
+            Text(
+              'Kobir Hosan',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            
+            SizedBox(height: 10),
+            
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Site Reliability Engineer',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            
+            SizedBox(height: 25),
+            
+            Text(
+              '5+ years of experience in IT infrastructure, cloud services, and enterprise security. Passionate about building scalable solutions and driving digital transformation.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey.shade600,
+                height: 1.6,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            SizedBox(height: 30),
+            
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildSkillTag('Azure', Colors.blue),
+                _buildSkillTag('AWS', Colors.orange),
+                _buildSkillTag('M365', Colors.purple),
+                _buildSkillTag('PowerShell', Colors.teal),
+                _buildSkillTag('Flutter', Colors.cyan),
+                _buildSkillTag('IoT', Colors.green),
+                // _buildSkillTag('Docker', Colors.blueAccent),
+                _buildSkillTag('Linux', Colors.indigo),
+              ],
+            ),
+            
+            SizedBox(height: 35),
+            
+            _buildDownloadCVButton(),
+            
+            SizedBox(height: 20),
+            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildContactIcon(
+                  FontAwesomeIcons.envelope,
+                  'mailto:kobirit.bappy@gmail.com',
+                  Colors.red,
+                ),
+                SizedBox(width: 20),
+                _buildContactIcon(
+                  FontAwesomeIcons.linkedin,
+                  'https://www.linkedin.com/in/kobir-hosan-102880137/',
+                  Colors.blue,
+                ),
+                SizedBox(width: 20),
+                _buildContactIcon(
+                  FontAwesomeIcons.github,
+                  'https://github.com/KobirBappy?tab=repositories',
+                  Colors.grey.shade800,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopProfileCard() {
+    return RepaintBoundary(
+      child: GlassmorphicCard(
+        padding: EdgeInsets.all(50),
+        gradientColors: [
+          Colors.white.withOpacity(0.95),
+          Colors.indigo.withOpacity(0.05),
+        ],
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF667EEA),
+                          Color(0xFF764BA2),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.indigo.withOpacity(0.3),
+                          blurRadius: 30,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsets.all(8),
+                    child: CircleAvatar(
+                      radius: 120,
+                      backgroundImage: _cachedProfileImageUrl != null 
+                          ? CachedNetworkImageProvider(_cachedProfileImageUrl!)
+                          : null,
+                      backgroundColor: Colors.grey.shade200,
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildContactIcon(
+                        FontAwesomeIcons.envelope,
+                        'mailto:kobirit.bappy@gmail.com',
+                        Colors.red,
+                      ),
+                      SizedBox(width: 25),
+                      _buildContactIcon(
+                        FontAwesomeIcons.linkedin,
+                        'https://www.linkedin.com/in/kobir-hosan-102880137/',
+                        Colors.blue,
+                      ),
+                      SizedBox(width: 25),
+                      _buildContactIcon(
+                        FontAwesomeIcons.github,
+                        'https://github.com/KobirBappy?tab=repositories',
+                        Colors.grey.shade800,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            SizedBox(width: 60),
+            
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Kobir Hosan',
+                    style: TextStyle(
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  
+                  SizedBox(height: 15),
+                  
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Text(
+                      'Site Reliability Engineer',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 30),
+                  
+                  Text(
+                    '5+ years of experience in IT infrastructure, cloud services, and enterprise security. Skilled in managing site operations, Microsoft 365, Active Directory/Azure AD, and endpoint lifecycle.',
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Colors.grey.shade600,
+                      height: 1.7,
+                    ),
+                  ),
+                  
+                  SizedBox(height: 25),
+                  
+                  Text(
+                    'Passionate about ensuring system resilience, strengthening cybersecurity, and driving automation to reduce operational overhead and improve service delivery.',
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Colors.grey.shade600,
+                      height: 1.7,
+                    ),
+                  ),
+                  
+                  SizedBox(height: 35),
+                  
+                  Text(
+                    'Expertise:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  
+                  SizedBox(height: 15),
+                  
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _buildSkillTag('Azure', Colors.blue),
+                      _buildSkillTag('AWS', Colors.orange),
+                      _buildSkillTag('Microsoft 365', Colors.purple),
+                      _buildSkillTag('PowerShell', Colors.teal),
+                      _buildSkillTag('Flutter', Colors.cyan),
+                      _buildSkillTag('IoT', Colors.green),
+                      _buildSkillTag('Docker', Colors.blueAccent),
+                      _buildSkillTag('Linux', Colors.indigo),
+                    ],
+                  ),
+                  
+                  SizedBox(height: 40),
+                  
+                  _buildDownloadCVButton(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkillTag(String skill, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Text(
+        skill,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContactIcon(IconData icon, String url, Color color) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () async {
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
+        child: Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: color.withOpacity(0.3),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 20,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDownloadCVButton() {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => _downloadCV(),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+            ),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.indigo.withOpacity(0.4),
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: () => _downloadCV(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 35,
+                vertical: 18,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              elevation: 0,
+              shadowColor: Colors.transparent,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(FontAwesomeIcons.download, size: 18),
+                SizedBox(width: 12),
+                Text(
+                  'Download CV',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _downloadCV() async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white, 
+                  strokeWidth: 2
+                ),
+              ),
+              SizedBox(width: 15),
+              Text('Preparing CV download...'),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.indigo,
+        ),
+      );
+
+      // Get download URL from Firebase Storage
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('cv/Kobir Hosan - SRE CV, 5 years.pdf');
+      final downloadUrl = await storageRef.getDownloadURL();
+      
+      final uri = Uri.parse(downloadUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 15),
+                  Text('CV download started!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('CV Download Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Text('Failed to download CV: ${e.toString()}'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildHireMeSection() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 20),
+      padding: getResponsivePadding(context),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF667EEA),
+            Color(0xFF764BA2),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.3),
+            blurRadius: 20,
+            spreadRadius: 5,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            FontAwesomeIcons.briefcase,
+            color: Colors.white,
+            size: 60,
+          ),
+          
+          SizedBox(height: 25),
+          
+          Text(
+            '🚀 Want to Hire Me?',
+            style: TextStyle(
+              fontSize: getResponsiveFontSize(context,
+                mobile: 30, tablet: 36, desktop: 42),
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          SizedBox(height: 20),
+          
+          Text(
+            'Looking for a reliable Site Reliability Engineer to strengthen your team?\nLet\'s discuss how I can help your organization.',
+            style: TextStyle(
+              fontSize: getResponsiveFontSize(context,
+                mobile: 16, tablet: 18, desktop: 20),
+              color: Colors.white.withOpacity(0.9),
+              height: 1.6,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          SizedBox(height: 35),
+          
+          Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildHireMeButton(
+                'Contact Me',
+                FontAwesomeIcons.envelope,
+                () => Navigator.pushNamed(context, '/contact'),
+              ),
+              _buildHireMeButton(
+                'View Projects',
+                FontAwesomeIcons.github,
+                () async {
+                  final uri = Uri.parse('https://github.com/KobirBappy?tab=repositories');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+              ),
+              _buildHireMeButton(
+                'LinkedIn',
+                FontAwesomeIcons.linkedin,
+                () async {
+                  final uri = Uri.parse('https://www.linkedin.com/in/kobir-hosan-102880137/');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEnhancedHeroButton(String text, IconData icon, List<Color> colors, VoidCallback onPressed, bool filled) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, (1 - _controller.value) * 50),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors[0].withOpacity(0.4),
-                    blurRadius: 25,
-                    spreadRadius: 3,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: filled
-                  ? Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: colors),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: onPressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isMobile(context) ? 40 : 50,
-                            vertical: isMobile(context) ? 20 : 25,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(icon, size: 22),
-                            SizedBox(width: 12),
-                            Text(
-                              text,
-                              style: TextStyle(
-                                fontSize: isMobile(context) ? 16 : 18,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : OutlinedButton(
-                      onPressed: onPressed,
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: colors[0], width: 2.5),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile(context) ? 40 : 50,
-                          vertical: isMobile(context) ? 20 : 25,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        backgroundColor: Colors.white.withOpacity(0.1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon, color: colors[0], size: 22),
-                          SizedBox(width: 12),
-                          Text(
-                            text,
-                            style: TextStyle(
-                              fontSize: isMobile(context) ? 16 : 18,
-                              color: colors[0],
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
+  Widget _buildHireMeButton(String text, IconData icon, VoidCallback onTap) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile(context) ? 25 : 30,
+            vertical: isMobile(context) ? 15 : 18,
           ),
-        );
-      },
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: Color(0xFF667EEA),
+                size: 20,
+              ),
+              SizedBox(width: 12),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: isMobile(context) ? 15 : 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF667EEA),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -993,7 +1431,6 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
       ),
       child: Column(
         children: [
-          // Enhanced Section Header
           _buildSectionHeader(
             '🔥 Hot Deals',
             'Limited time offers on our most popular products',
@@ -1045,33 +1482,25 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: 1.0 + (_pulseController.value * 0.2),
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        colors: [
-                          color.withOpacity(0.3),
-                          color.withOpacity(0.1),
-                        ],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: color.withOpacity(0.4),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Icon(Icons.local_fire_department, color: color, size: 38),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  colors: [
+                    color.withOpacity(0.2),
+                    color.withOpacity(0.05),
+                  ],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
                   ),
-                );
-              },
+                ],
+              ),
+              child: Icon(Icons.local_fire_department, color: color, size: 38),
             ),
             SizedBox(width: 15),
             Text(
@@ -1117,8 +1546,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             boxShadow: [
               BoxShadow(
                 color: color.withOpacity(0.2),
-                blurRadius: 15,
-                offset: Offset(0, 5),
+                blurRadius: 10,
+                offset: Offset(0, 3),
               ),
             ],
           ),
@@ -1143,184 +1572,200 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
   }
 
   Widget _buildEnhancedProductCard(Map<String, dynamic> data) {
-    return Container(
-      width: isMobile(context) ? 290 : 330,
-      margin: EdgeInsets.only(right: 25),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GlassmorphicCard(
-          padding: EdgeInsets.zero,
-          gradientColors: [
-            Colors.white.withOpacity(0.9),
-            Colors.white.withOpacity(0.7),
-          ],
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  Container(
-                    height: 220,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-                      image: DecorationImage(
-                        image: NetworkImage(data['image'] ?? ''),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    height: 220,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.4),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (data['discount'] != null)
-                    Positioned(
-                      top: 15,
-                      left: 15,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.red.withOpacity(0.6),
-                              blurRadius: 15,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          '${data['discount']}% OFF',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (data['badge'] != null)
-                    Positioned(
-                      top: 15,
-                      right: 15,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: _getBadgeColor(data['badgeColor']),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _getBadgeColor(data['badgeColor']).withOpacity(0.5),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          data['badge'],
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(25),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return RepaintBoundary(
+      child: Container(
+        width: isMobile(context) ? 290 : 330,
+        margin: EdgeInsets.only(right: 25),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GlassmorphicCard(
+            padding: EdgeInsets.zero,
+            gradientColors: [
+              Colors.white.withOpacity(0.9),
+              Colors.white.withOpacity(0.7),
+            ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
                   children: [
-                    Text(
-                      data['name'] ?? '',
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
+                    Container(
+                      height: 220,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                        child: CachedNetworkImage(
+                          imageUrl: data['image'] ?? '',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey.shade200,
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey.shade300,
+                            child: Icon(Icons.image_not_supported),
+                          ),
+                        ),
                       ),
                     ),
-                    SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Text(
-                          "\$${data['price']}",
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        if (data['originalPrice'] != null)
-                          Text(
-                            "\$${data['originalPrice']}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade500,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.orange, Colors.deepOrange],
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withOpacity(0.4),
-                              blurRadius: 15,
-                              offset: Offset(0, 8),
-                            ),
+                    Container(
+                      height: 220,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.3),
                           ],
                         ),
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pushNamed(context, '/products'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    if (data['discount'] != null)
+                      Positioned(
+                        top: 15,
+                        left: 15,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
                             ),
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.red.withOpacity(0.4),
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                              ),
+                            ],
                           ),
                           child: Text(
-                            'View Details',
+                            '${data['discount']}% OFF',
                             style: TextStyle(
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 12,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    if (data['badge'] != null)
+                      Positioned(
+                        top: 15,
+                        right: 15,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _getBadgeColor(data['badgeColor']),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _getBadgeColor(data['badgeColor']).withOpacity(0.4),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            data['badge'],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.all(25),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Text(
+                            "\$${data['price']}",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          if (data['originalPrice'] != null)
+                            Text(
+                              "\$${data['originalPrice']}",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade500,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.orange, Colors.deepOrange],
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.orange.withOpacity(0.3),
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pushNamed(context, '/products'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              'View Details',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1364,7 +1809,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             ),
             itemCount: services.length,
             itemBuilder: (context, index) {
-              return _buildEnhancedServiceCard(services[index], index);
+              return _buildEnhancedServiceCard(services[index]);
             },
           ),
         ],
@@ -1372,88 +1817,71 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     );
   }
 
-  Widget _buildEnhancedServiceCard(Service service, int index) {
-    return AnimatedBuilder(
-      animation: _cardControllers[index],
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, (1 - _cardControllers[index].value) * 50),
-          child: Opacity(
-            opacity: _cardControllers[index].value,
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GlassmorphicCard(
-                padding: EdgeInsets.all(25),
-                gradientColors: [
-                  Colors.white.withOpacity(0.9),
-                  service.color.withOpacity(0.05),
-                ],
-                child: InkWell(
-                  onTap: () => Navigator.pushNamed(context, '/services'),
-                  borderRadius: BorderRadius.circular(25),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: 1.0 + (_pulseController.value * 0.1),
-                            child: Container(
-                              padding: EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                gradient: RadialGradient(
-                                  colors: [
-                                    service.color.withOpacity(0.2),
-                                    service.color.withOpacity(0.05),
-                                  ],
-                                ),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: service.color.withOpacity(0.3),
-                                    blurRadius: 20,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                service.icon,
-                                size: isMobile(context) ? 35 : 40,
-                                color: service.color,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(height: 22),
-                      Text(
-                        service.title,
-                        style: TextStyle(
-                          fontSize: isMobile(context) ? 17 : 19,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        service.description,
-                        style: TextStyle(
-                          fontSize: isMobile(context) ? 14 : 15,
-                          color: Colors.grey.shade600,
-                          height: 1.4,
-                        ),
-                        textAlign: TextAlign.center,
+  Widget _buildEnhancedServiceCard(Service service) {
+    return RepaintBoundary(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GlassmorphicCard(
+          padding: EdgeInsets.all(25),
+          gradientColors: [
+            Colors.white.withOpacity(0.9),
+            service.color.withOpacity(0.05),
+          ],
+          child: InkWell(
+            onTap: () => Navigator.pushNamed(context, '/services'),
+            borderRadius: BorderRadius.circular(25),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      colors: [
+                        service.color.withOpacity(0.2),
+                        service.color.withOpacity(0.05),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: service.color.withOpacity(0.2),
+                        blurRadius: 15,
+                        spreadRadius: 2,
                       ),
                     ],
                   ),
+                  child: Icon(
+                    service.icon,
+                    size: isMobile(context) ? 35 : 40,
+                    color: service.color,
+                  ),
                 ),
-              ),
+                SizedBox(height: 22),
+                Text(
+                  service.title,
+                  style: TextStyle(
+                    fontSize: isMobile(context) ? 17 : 19,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 12),
+                Text(
+                  service.description,
+                  style: TextStyle(
+                    fontSize: isMobile(context) ? 14 : 15,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -1565,7 +1993,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
     ];
 
     return Container(
-      padding: getResponsivePadding(context, compact: true), // Reduced padding
+      padding: getResponsivePadding(context, compact: true),
       child: Column(
         children: [
           _buildSectionHeader(
@@ -1574,7 +2002,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             Colors.purple,
           ),
           
-          SizedBox(height: 35), // Reduced spacing
+          SizedBox(height: 35),
           
           CarouselSlider(
             options: CarouselOptions(
@@ -1586,81 +2014,85 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
               height: isMobile(context) ? 320 : 350,
             ),
             items: testimonials.map((testimonial) {
-              return GlassmorphicCard(
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                padding: EdgeInsets.all(25),
-                gradientColors: [
-                  Colors.white.withOpacity(0.9),
-                  Colors.purple.withOpacity(0.05),
-                ],
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.purple.withOpacity(0.3),
-                            Colors.purple.withOpacity(0.1),
+              return RepaintBoundary(
+                child: GlassmorphicCard(
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  padding: EdgeInsets.all(25),
+                  gradientColors: [
+                    Colors.white.withOpacity(0.9),
+                    Colors.purple.withOpacity(0.05),
+                  ],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              Colors.purple.withOpacity(0.2),
+                              Colors.purple.withOpacity(0.05),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.purple.withOpacity(0.3),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                            ),
                           ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.purple.withOpacity(0.4),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+                        child: CircleAvatar(
+                          radius: isMobile(context) ? 35 : 40,
+                          backgroundImage: CachedNetworkImageProvider(
+                            testimonial['image'] as String,
                           ),
-                        ],
+                        ),
                       ),
-                      child: CircleAvatar(
-                        radius: isMobile(context) ? 35 : 40,
-                        backgroundImage: NetworkImage(testimonial['image'] as String),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(5, (index) {
+                          return Icon(
+                            Icons.star,
+                            color: index < (testimonial['rating'] as int)
+                                ? Colors.amber
+                                : Colors.grey.shade300,
+                            size: 22,
+                          );
+                        }),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          Icons.star,
-                          color: index < (testimonial['rating'] as int)
-                              ? Colors.amber
-                              : Colors.grey.shade300,
-                          size: 22,
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 15),
-                    Text(
-                      testimonial['text'] as String,
-                      style: TextStyle(
-                        fontSize: isMobile(context) ? 14 : 16,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey.shade700,
-                        height: 1.5,
+                      SizedBox(height: 15),
+                      Text(
+                        testimonial['text'] as String,
+                        style: TextStyle(
+                          fontSize: isMobile(context) ? 14 : 16,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey.shade700,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      testimonial['name'] as String,
-                      style: TextStyle(
-                        fontSize: isMobile(context) ? 16 : 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      SizedBox(height: 20),
+                      Text(
+                        testimonial['name'] as String,
+                        style: TextStyle(
+                          fontSize: isMobile(context) ? 16 : 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      testimonial['company'] as String,
-                      style: TextStyle(
-                        fontSize: isMobile(context) ? 12 : 14,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(height: 5),
+                      Text(
+                        testimonial['company'] as String,
+                        style: TextStyle(
+                          fontSize: isMobile(context) ? 12 : 14,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }).toList(),
@@ -1673,8 +2105,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
   Widget _buildStatsSection(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: getResponsivePadding(context, compact: true), // Reduced padding
-      margin: EdgeInsets.only(top: 15), // Reduced top margin
+      padding: getResponsivePadding(context, compact: true),
+      margin: EdgeInsets.only(top: 15),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -1686,10 +2118,10 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withOpacity(0.3),
-            blurRadius: 30,
-            spreadRadius: 10,
-            offset: Offset(0, 10),
+            color: Colors.purple.withOpacity(0.2),
+            blurRadius: 20,
+            spreadRadius: 5,
+            offset: Offset(0, 5),
           ),
         ],
       ),
@@ -1717,7 +2149,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 35), // Reduced spacing
+          SizedBox(height: 35),
           GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -1739,73 +2171,65 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
   }
 
   Widget _buildGlassmorphicStatCard(Map<String, dynamic> statMap) {
-    return GlassmorphicCard(
-      padding: EdgeInsets.all(20),
-      gradientColors: [
-        Colors.white.withOpacity(0.2),
-        Colors.white.withOpacity(0.1),
-      ],
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: 1.0 + (_pulseController.value * 0.1),
-                child: Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.3),
-                        Colors.white.withOpacity(0.1),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    statMap['icon'] as IconData,
-                    size: 35,
+    return RepaintBoundary(
+      child: GlassmorphicCard(
+        padding: EdgeInsets.all(20),
+        gradientColors: [
+          Colors.white.withOpacity(0.2),
+          Colors.white.withOpacity(0.1),
+        ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.2),
+                    Colors.white.withOpacity(0.05),
+                  ],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                statMap['icon'] as IconData,
+                size: 35,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 15),
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: statMap['number']),
+              duration: Duration(seconds: 2),
+              builder: (context, value, child) {
+                return Text(
+                  '$value${statMap['suffix']}',
+                  style: TextStyle(
+                    fontSize: getResponsiveFontSize(context,
+                      mobile: 26, tablet: 30, desktop: 34),
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
-                ),
-              );
-            },
-          ),
-          SizedBox(height: 15),
-          TweenAnimationBuilder<int>(
-            tween: IntTween(begin: 0, end: statMap['number']),
-            duration: Duration(seconds: 2),
-            builder: (context, value, child) {
-              return Text(
-                '$value${statMap['suffix']}',
-                style: TextStyle(
-                  fontSize: getResponsiveFontSize(context,
-                    mobile: 26, tablet: 30, desktop: 34),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              );
-            },
-          ),
-          SizedBox(height: 8),
-          Text(
-            statMap['label'],
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(context,
-                mobile: 13, tablet: 14, desktop: 15),
-              color: Colors.white70,
-              fontWeight: FontWeight.w500,
+                );
+              },
             ),
-          ),
-        ],
+            SizedBox(height: 8),
+            Text(
+              statMap['label'],
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: getResponsiveFontSize(context,
+                  mobile: 13, tablet: 14, desktop: 15),
+                color: Colors.white70,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
- 
 
   Widget _buildFooter() {
     return Container(
@@ -1855,8 +2279,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                         _buildSocialIcon(FontAwesomeIcons.twitter, Colors.lightBlue),
                         SizedBox(width: 15),
                         _buildSocialIcon(FontAwesomeIcons.linkedin, Colors.blueAccent),
-                        SizedBox(width: 15),
-                        _buildSocialIcon(FontAwesomeIcons.instagram, Colors.pink),
+                        // SizedBox(width: 15),
+                        // _buildSocialIcon(FontAwesomeIcons.instagram, Colors.pink),
                       ],
                     ),
                   ],
@@ -1870,8 +2294,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                 ]),
                 SizedBox(height: 40),
                 _buildFooterSection('Contact', [
-                  'info@apptechvibe.com',
-                  '+880 1234567890',
+                  'kobirit.bappy@gmail.com',
+                  '+880 1727507239',
                   'Dhaka, Bangladesh',
                 ]),
               ],
@@ -1911,8 +2335,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                         _buildSocialIcon(FontAwesomeIcons.twitter, Colors.lightBlue),
                         SizedBox(width: 15),
                         _buildSocialIcon(FontAwesomeIcons.linkedin, Colors.blueAccent),
-                        SizedBox(width: 15),
-                        _buildSocialIcon(FontAwesomeIcons.instagram, Colors.pink),
+                        // SizedBox(width: 15),
+                        // _buildSocialIcon(FontAwesomeIcons.instagram, Colors.pink),
                       ],
                     ),
                   ],
@@ -1930,8 +2354,8 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
                   'Careers',
                 ]),
                 _buildFooterSection('Contact', [
-                  'info@apptechvibe.com',
-                  '+880 1234567890',
+                  'kobirit.bappy@gmail.com',
+                  '+880 1727507239',
                   'Dhaka, Bangladesh',
                 ]),
               ],
@@ -1939,7 +2363,7 @@ class _EnhancedLandingPageState extends State<EnhancedLandingPage> with TickerPr
           SizedBox(height: 40),
           Divider(color: Colors.grey.shade700),
           SizedBox(height: 20),
-         Text(
+          Text(
             '© ${DateTime.now().year} AppTech Vibe. All rights reserved.',
             style: TextStyle(color: Colors.grey.shade400, fontSize: isMobile(context) ? 12 : 14),
             textAlign: TextAlign.center,
@@ -2005,27 +2429,11 @@ class Service {
   final String title;
   final String description;
   final Color color;
-  final String image;
 
   Service({
     required this.icon,
     required this.title,
     required this.description,
     required this.color,
-    required this.image,
   });
 }
-
-class Stat {
-  final IconData icon;
-  final String value;
-  final String label;
-
-  Stat({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-}
-
-

@@ -1,7 +1,7 @@
 // lib/theme_aware_landing_complete.dart
 import 'package:flutter/material.dart';
+import 'package:itapp/main.dart';
 import 'package:provider/provider.dart';
-import 'enhancedtheme.dart';
 import 'theme_manager_complete.dart';
 
 // Import your actual landing page file - UPDATE THIS PATH TO YOUR ACTUAL FILE
